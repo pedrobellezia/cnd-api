@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Environment variables
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# Prisma
+prisma/generated/
+.prisma/client/
+.prisma/migrations/
+.prisma/dev.db
+
+# Public
+/public/*
+
+# Seed
+seed-data.json
+

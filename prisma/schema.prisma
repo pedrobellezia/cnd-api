@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model fornecedor {
+  id        String   @id @default(uuid())
+  cnpj      String   @unique
+  name      String
+  uf        String
+  municipio String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  cnd cnd[]
+}
+
+model cnd {
+  id           String    @id @default(uuid())
+  fornecedorid String
+  file_name    String?
+  validade     DateTime? @db.Timestamp(6)
+  emissao      DateTime? @db.Timestamp(6)
+  status       String
+  cndtypeid    String?
+  createdAt    DateTime  @default(now()) @db.Timestamp(6)
+
+  fornecedor fornecedor @relation(fields: [fornecedorid], references: [id])
+  cndtype    cndtype?   @relation(fields: [cndtypeid], references: [id])
+}
+
+model cndtype {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  cnds cnd[]
+}
+
+model estadual {
+  id        String   @id @default(uuid())
+  uf        String   @unique
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model municipal {
+  id        String   @id @default(uuid())
+  municipio String   @unique
+  uf        String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
