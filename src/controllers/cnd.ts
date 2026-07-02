@@ -41,7 +41,7 @@ class CndManager {
             },
         });
 
-        logger.info({ context: "CndManager.newCnd", msg: "CND criada com sucesso", fornecedorid: data.fornecedorid, tipo: cndType.name, validade: createdCnd.validade });
+        logger.info({ context: "CndManager.newCnd", msg: "CND criada com sucesso", fornecedorid: data.fornecedorid, cnpj: data.cnpj, tipo: cndType.name, validade: createdCnd.validade });
 
         return createdCnd;
     }
@@ -112,6 +112,7 @@ class CndManager {
 
             const cndData = await newCnd.safeParseAsync({
                 fornecedorid: fornecedor.id,
+                cnpj: fornecedor.cnpj,
                 cndtypeid: cndType.id,
                 file_name: fileName,
                 validade: extracted.validade ?? undefined,

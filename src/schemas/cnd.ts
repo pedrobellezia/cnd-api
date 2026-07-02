@@ -3,6 +3,7 @@ import * as z from "zod";
 const newCnd = z
   .object({
     fornecedorid: z.string(),
+    cnpj: z.string(),
     cndtypeid: z.string(),
     file_name: z.string(),
     validade: z.string().optional(),
