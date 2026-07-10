@@ -11,12 +11,58 @@ interface ApiResponse<T = any> {
 }
 
 class ApiResponseHandler {
+  // Higieniza os dados removendo chaves internas do banco de dados e IDs ilegíveis
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static sanitize(data: any): any {
+    if (data === null || data === undefined) {
+      return data;
+    }
+
+    if (data instanceof Date) {
+      return data;
+    }
+
+    if (Array.isArray(data)) {
+      return data.map((item) => this.sanitize(item));
+    }
+
+    if (typeof data === "object") {
+      if (typeof Buffer !== "undefined" && Buffer.isBuffer(data)) {
+        return data;
+      }
+
+      const proto = Object.getPrototypeOf(data);
+      if (proto !== null && proto !== Object.prototype) {
+        return data;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sanitized: any = {};
+      for (const [key, value] of Object.entries(data)) {
+        const lowerKey = key.toLowerCase();
+        if (
+          lowerKey === "id" ||
+          lowerKey.endsWith("id") ||
+          lowerKey === "createdat" ||
+          lowerKey === "updatedat" ||
+          lowerKey === "deletedat"
+        ) {
+          continue;
+        }
+        sanitized[key] = this.sanitize(value);
+      }
+      return sanitized;
+    }
+
+    return data;
+  }
+
   // Retorna uma resposta de sucesso
   static success<T>(res: Response, data: T, statusCode: number = 200): void {
     res.status(statusCode).json({
       success: true,
-      data,
-    } as ApiResponse<T>);
+      data: this.sanitize(data),
+    } as ApiResponse<unknown>);
   }
 
   static trycatchHandler(res: Response, error: unknown) {
