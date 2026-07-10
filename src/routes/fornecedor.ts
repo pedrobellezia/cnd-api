@@ -2,7 +2,6 @@ import { Router } from "express";
 import FornecedorManager from "../controllers/fornecedor.js";
 import { newFornecedor, searchFornecedorSchema } from "../schemas/fornecedor.js";
 import ApiResponseHandler from "../lib/response.js";
-import { BaseError } from "../lib/error.js";
 import { prisma } from "../lib/prisma.js";
 
 const fornecedorRoute = Router();

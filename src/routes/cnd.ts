@@ -17,7 +17,7 @@ cndRoute.post("/", upload.array("file"), async (req, res) => {
             ApiResponseHandler.error(res, "Arquivo PDF é obrigatório", null, 400);
             return;
         }
-        let results = []
+        const results = []
 
         for (const file of req.files) {
             const rs = await CndManager.processFiles(file)
