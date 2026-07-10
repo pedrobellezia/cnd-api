@@ -137,10 +137,26 @@ class CndManager {
             }
 
             const cnd = await CndManager.newCnd(cndData.data);
-            return {file: file.originalname, success: true, data: cnd};
+            return {
+                file: file.originalname,
+                success: true,
+                data: {
+                    fornecedor: {
+                        name: fornecedor.name,
+                        cnpj: fornecedor.cnpj,
+                    },
+                    cnd: {
+                        filename: cnd.file_name,
+                        validade: cnd.validade,
+                        emissao: cnd.emissao,
+                        status: cnd.status,
+                        tipo: cndType.name,
+                    }
+                }
+            };
         } catch (err: unknown) {
             if (err instanceof DeepSeekError) {
-                logger.error({ context: "CndManager.processFiles", msg: "Erro inesperado do deepseek", file: file.originalname, error: err.message });
+                logger.error({ context: "CndManager.processFiles", msg: "Erro durante o processamento do arquivo pelo deepseek", file: file.originalname, error: err.message });
                 return {
                     file: file.originalname,
                     success: false,

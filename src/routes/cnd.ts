@@ -21,11 +21,10 @@ cndRoute.post("/", upload.array("file"), async (req, res) => {
 
         for (const file of req.files) {
             const rs = await CndManager.processFiles(file)
-            results.push(rs);
-
             if (!rs.success) {
                 logger.warn({ context: "cndRoute.post", msg: "Falha no arquivo", file: rs.file, error: rs.error });
             }
+            results.push(rs);
         }
 
         ApiResponseHandler.success(res, results, 201);

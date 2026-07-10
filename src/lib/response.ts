@@ -3,16 +3,13 @@ import { ZodError } from "zod";
 import { BaseError } from "./error.js";
 import { logger } from "./logger.js";
 
-interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
+interface ApiResponse {
   error?: string;
   details?: any;
 }
 
 class ApiResponseHandler {
   // Higieniza os dados removendo chaves internas do banco de dados e IDs ilegíveis
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private static sanitize(data: any): any {
     if (data === null || data === undefined) {
       return data;
@@ -36,7 +33,6 @@ class ApiResponseHandler {
         return data;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sanitized: any = {};
       for (const [key, value] of Object.entries(data)) {
         const lowerKey = key.toLowerCase();
@@ -59,10 +55,7 @@ class ApiResponseHandler {
 
   // Retorna uma resposta de sucesso
   static success<T>(res: Response, data: T, statusCode: number = 200): void {
-    res.status(statusCode).json({
-      success: true,
-      data: this.sanitize(data),
-    } as ApiResponse<unknown>);
+    res.status(statusCode).json(this.sanitize(data));
   }
 
   static trycatchHandler(res: Response, error: unknown) {
@@ -87,7 +80,6 @@ class ApiResponseHandler {
     statusCode: number = 400,
   ): void {
     res.status(statusCode).json({
-      success: false,
       error,
       ...(details && { details }),
     } as ApiResponse);
@@ -103,7 +95,6 @@ class ApiResponseHandler {
     }));
 
     res.status(400).json({
-      success: false,
       error: "Dados inválidos",
       details,
     } as ApiResponse);
@@ -120,7 +111,6 @@ class ApiResponseHandler {
     logger.error({ context, msg: "Erro interno", error: error instanceof Error ? error.message : error });
 
     res.status(statusCode).json({
-      success: false,
       error: "Erro interno do servidor",
     } as ApiResponse);
   }
@@ -129,7 +119,6 @@ class ApiResponseHandler {
 
   static notFound(res: Response, resource: string = "Recurso"): void {
     res.status(404).json({
-      success: false,
       error: `${resource} não encontrado`,
     } as ApiResponse);
   }
@@ -138,7 +127,6 @@ class ApiResponseHandler {
 
   static conflict(res: Response, error: string): void {
     res.status(409).json({
-      success: false,
       error,
     } as ApiResponse);
   }
@@ -147,7 +135,6 @@ class ApiResponseHandler {
 
   static forbidden(res: Response, error: string): void {
     res.status(403).json({
-      success: false,
       error,
     } as ApiResponse);
   }
