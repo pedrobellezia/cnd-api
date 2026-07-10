@@ -1,12 +1,12 @@
 import {prisma} from "../lib/prisma.js";
 import {type NewCnd, newCnd} from "../schemas/cnd.js";
-import {cnd} from "@prisma/client";
 import {NotFoundError} from "../lib/error.js";
 import processBuffer, {DeepSeekError, savePdf} from "../lib/utils.js";
 import { logger } from "../lib/logger.js";
 
 class CndManager {
-    static async newCnd(data: NewCnd): Promise<cnd> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    static async newCnd(data: NewCnd): Promise<any> {
         const cndType = await prisma.cndtype.findUnique({
             where: {id: data.cndtypeid},
             select: {id: true, name: true},
@@ -38,6 +38,13 @@ class CndManager {
                 emissao: emissao,
                 status: data.status,
                 cndtypeid: data.cndtypeid,
+            },
+            include: {
+                cndtype: {
+                    select: {
+                        name: true,
+                    },
+                },
             },
         });
 
