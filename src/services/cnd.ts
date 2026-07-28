@@ -2,11 +2,9 @@ import { prisma } from "../core/database.js";
 import { logger } from "../core/logger.js";
 import { DateTime } from "luxon";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
-import { PdfExtractorService } from "./pdf-extractor.js";
+import { PdfService } from "./pdf.js";
 import { NewCndInput, newCndSchema } from "../schemas/cnd.js";
-import fs from "fs/promises";
-import crypto from "crypto";
-import path from "path";
+
 import { normalizeCnpj } from "../utils/normalize.js";
 
 export interface ProcessFileResult {
@@ -35,16 +33,6 @@ export interface ProcessFileResult {
 }
 
 export class CndService {
-  static async savePdf(buffer: Buffer): Promise<string> {
-    const filename = `${crypto.randomBytes(8).toString("hex")}.pdf`;
-    const filepath = path.join("public", filename);
-
-    await fs.mkdir("public", { recursive: true });
-    await fs.writeFile(filepath, buffer);
-
-    return filename;
-  }
-
   static async newCnd(data: NewCndInput) {
     const cndType = await prisma.cndtype.findUnique({
       where: { id: data.cndtypeid },
@@ -131,8 +119,8 @@ export class CndService {
   ): Promise<ProcessFileResult> {
     try {
       const pdfBuffer = file.buffer;
-      const extracted = await PdfExtractorService.extractCndData(pdfBuffer);
-
+      const extracted = await PdfService.extractCndData(pdfBuffer);
+      
       if (!extracted.cnpj) {
         throw new AppError(
           AppErrorType.VALIDATION_ERROR,
@@ -161,7 +149,7 @@ export class CndService {
         );
       }
 
-      const fileName = await this.savePdf(pdfBuffer);
+      const fileName = await PdfService.savePdf(pdfBuffer);
 
       const validatedData = await newCndSchema.parseAsync({
         fornecedorid: fornecedor.id,

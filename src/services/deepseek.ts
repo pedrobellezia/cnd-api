@@ -1,20 +1,14 @@
-import { PDFParse } from "pdf-parse";
 import { deepseekClient } from "../core/deepseek.js";
-import { DateTime } from "luxon";
 import { logger } from "../core/logger.js";
 import axios from "axios";
 import {
   BaseError,
-  AppError,
-  AppErrorType,
   DeepSeekError,
   DeepSeekErrorType,
-  PdfError,
-  PdfErrorType,
 } from "../errors/custom-errors.js";
 import promptConfig from "../core/deepseek-prompt.json" with { type: "json" };
 
-export type CndExtracted = {
+export type CndExtractionResult = {
   cnpj: string;
   emissao: string | null;
   validade: string | null;
@@ -22,24 +16,8 @@ export type CndExtracted = {
   status: string;
 };
 
-export class PdfExtractorService {
-  static async extractCndData(buffer: Buffer): Promise<CndExtracted> {
-    const parser = new PDFParse(new Uint8Array(buffer));
-    let text: string;
-    try {
-      const parsedPdf = await parser.getText();
-      text = parsedPdf.text;
-    } finally {
-      await parser.destroy();
-    }
-
-    if (!text?.trim()) {
-      throw new PdfError(
-        PdfErrorType.EMPTY_OR_UNREADABLE,
-        "PDF vazio ou ilegível",
-      );
-    }
-
+export class DeepSeekService {
+  static async analyzeCndText(text: string): Promise<CndExtractionResult> {
     try {
       const response = await deepseekClient.post("/chat/completions", {
         model: promptConfig.model,
@@ -60,18 +38,6 @@ export class PdfExtractorService {
         );
       }
 
-      const validade = DateTime.fromISO(parsed.data.validade, {
-        zone: "America/Sao_Paulo",
-      });
-
-      if (
-        validade.isValid &&
-        validade < DateTime.now().setZone("America/Sao_Paulo") &&
-        parsed.data.status.toLowerCase() === "regular"
-      ) {
-        throw new AppError(AppErrorType.EXPIRED_CND, "CND vencida");
-      }
-
       const data = parsed.data;
       return {
         cnpj: data.cnpj,
@@ -88,7 +54,7 @@ export class PdfExtractorService {
       if (axios.isAxiosError(err)) {
         logger.error(
           {
-            context: "PdfExtractorService.extractCndData",
+            context: "DeepSeekService.analyzeCndText",
             status: err.response?.status,
             deepseekError: err.response?.data,
             error: err.message,
@@ -100,7 +66,7 @@ export class PdfExtractorService {
       } else {
         logger.error(
           {
-            context: "PdfExtractorService.extractCndData",
+            context: "DeepSeekService.analyzeCndText",
             error: err.message || String(err),
             stack: err.stack,
           },
