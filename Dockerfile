@@ -15,4 +15,6 @@ COPY --from=builder /app/src/generated/prisma ./dist/generated/prisma
 COPY --from=builder /app/prisma ./prisma 
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 RUN mkdir /app/public
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
