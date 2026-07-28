@@ -28,6 +28,7 @@ services:
       HOST: ${HOST}
       LOG_LEVEL: ${LOG_LEVEL}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      NODE_ENV: production
     volumes:
       - ./public:/app/public
     depends_on:
