@@ -120,7 +120,7 @@ export class CndService {
     try {
       const pdfBuffer = file.buffer;
       const extracted = await PdfService.extractCndData(pdfBuffer);
-      
+
       if (!extracted.cnpj) {
         throw new AppError(
           AppErrorType.VALIDATION_ERROR,

@@ -47,6 +47,7 @@ cp .env.example .env
    ```
 
 2. **Prepare o Banco de Dados**:
+
    ```bash
    npx prisma migrate dev
    ```

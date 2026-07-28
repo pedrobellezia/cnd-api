@@ -11,7 +11,6 @@ import {
 } from "../errors/custom-errors.js";
 import { DeepSeekService } from "./deepseek.js";
 
-
 export type CndExtracted = {
   cnpj: string;
   emissao: string | null;
