@@ -100,16 +100,23 @@ export class FornecedorService {
 
     const { uf, municipio } = rows[0];
 
-    const estadoExists = await prisma.estadual.findUnique({
-      where: { uf },
-    });
+    const checkIntegration = process.env.CHECK_INTEGRATION === "true";
 
-    const municipioExists = await prisma.municipal.findFirst({
-      where: {
-        uf,
-        municipio,
-      },
-    });
+    let estadoExists: { uf: string } | null = null;
+    let municipioExists: { uf: string; municipio: string } | null = null;
+
+    if (checkIntegration) {
+      estadoExists = await prisma.estadual.findUnique({
+        where: { uf },
+      });
+
+      municipioExists = await prisma.municipal.findFirst({
+        where: {
+          uf,
+          municipio,
+        },
+      });
+    }
 
     const cnd = [];
 
@@ -118,17 +125,17 @@ export class FornecedorService {
         !r.file_name || (!!r.validade && new Date(r.validade) < new Date());
       let status = r.status ?? null;
 
-      if (isExpired && status !== "error") {
-        if (!estadoExists && r.tipo === "estadual") {
-          status = "em desenvolvimento";
+        if (isExpired && status !== "error" && checkIntegration) {
+          if (!estadoExists && r.tipo === "estadual") {
+            status = "em desenvolvimento";
+          }
+          if (!municipioExists && r.tipo === "municipal") {
+            status = "em desenvolvimento";
+          }
+          if (r.tipo === "federal") {
+            status = "em desenvolvimento";
+          }
         }
-        if (!municipioExists && r.tipo === "municipal") {
-          status = "em desenvolvimento";
-        }
-        if (r.tipo === "federal") {
-          status = "em desenvolvimento";
-        }
-      }
 
       if (isExpired) {
         cnd.push({
