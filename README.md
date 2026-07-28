@@ -47,8 +47,6 @@ cp .env.example .env
    ```
 
 2. **Prepare o Banco de Dados**:
-   Certifique-se de que uma instância do PostgreSQL esteja ativa. Ajuste a variável `DATABASE_URL` e execute as migrations:
-
    ```bash
    npx prisma migrate dev
    ```
@@ -131,9 +129,9 @@ cp .env.example .env
       },
       {
         "tipo": "municipal",
-        "file_name": null,
-        "validade": null,
-        "emissao": null,
+        "file_name": "a1b2c3d4e5f6g7h8.pdf",
+        "validade": "2026-08-30T03:00:00.000Z",
+        "emissao": "2026-08-15T03:00:00.000Z",
         "status": "irregular"
       },
       {
@@ -142,6 +140,13 @@ cp .env.example .env
         "validade": null,
         "emissao": null,
         "status": "em desenvolvimento"
+      },
+      {
+        "tipo": "trabalhista",
+        "file_name": "a1b2c3d4e5f6g7h8.pdf",
+        "validade": "2026-08-30T03:00:00.000Z",
+        "emissao": "2026-07-01T03:00:00.000Z",
+        "status": "regular"
       }
     ]
   }
