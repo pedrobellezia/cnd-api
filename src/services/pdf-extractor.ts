@@ -1,6 +1,7 @@
 import { PDFParse } from "pdf-parse";
 import { deepseekClient } from "../core/deepseek.js";
 import { DateTime } from "luxon";
+import { logger } from "../core/logger.js";
 import axios from "axios";
 import {
   BaseError,
@@ -82,6 +83,29 @@ export class PdfExtractorService {
     } catch (err: any) {
       if (err instanceof BaseError) {
         throw err;
+      }
+
+      if (axios.isAxiosError(err)) {
+        logger.error(
+          {
+            context: "PdfExtractorService.extractCndData",
+            status: err.response?.status,
+            deepseekError: err.response?.data,
+            error: err.message,
+          },
+          `Erro na chamada da API do DeepSeek: ${
+            err.response?.data?.error?.message || err.message
+          }`,
+        );
+      } else {
+        logger.error(
+          {
+            context: "PdfExtractorService.extractCndData",
+            error: err.message || String(err),
+            stack: err.stack,
+          },
+          `Erro inesperado ao processar resposta do DeepSeek: ${err.message || String(err)}`,
+        );
       }
 
       if (axios.isAxiosError(err)) {
