@@ -43,6 +43,68 @@ sequenceDiagram
     Router-->>Cliente: Resposta HTTP 201 com array de CNDs processadas
 ```
 
+### Modelagem do Banco de Dados
+
+O banco de dados utiliza o **PostgreSQL** e a modelagem é gerenciada via **Prisma ORM**. Abaixo está a representação do modelo de entidade-relacionamento e a descrição detalhada das tabelas.
+
+#### Diagrama de Entidade-Relacionamento (ER)
+
+```mermaid
+erDiagram
+    FORNECEDOR {
+        string id PK 
+        string cnpj UK 
+        string name 
+        string uf 
+        string municipio
+        timestamp createdAt
+    }
+
+    CND {
+        string id PK 
+        string fornecedorid FK 
+        string file_name 
+        timestamp validade
+        timestamp emissao 
+        string status 
+        string cndtypeid FK
+        timestamp createdAt
+    }
+
+    CNDTYPE {
+        string id PK 
+        string name UK
+        timestamp createdAt
+    }
+
+    ESTADUAL {
+        string id PK 
+        string uf UK 
+        timestamp createdAt
+    }
+
+    MUNICIPAL {
+        string id PK 
+        string municipio
+        string uf 
+        timestamp createdAt
+    }
+
+    FORNECEDOR ||--o{ CND : "possui"
+    CNDTYPE ||--o{ CND : "classifica"
+```
+
+> [!NOTE]
+> **Integração com cnd-scraper & n8n:**
+> As tabelas `estadual` e `municipal` foram concebidas para a integração com o projeto [cnd-scraper](https://github.com/pedrobellezia/cnd-scraper). 
+> Portanto, elas não são cruciais para o funcionamento isolado deste projeto.
+> 
+> Se você quiser utilizar este projeto de forma independente (sem a integração), basta definir a variável de ambiente `CHECK_INTEGRATION=false` no seu arquivo `.env`.
+> 
+> Para mais detalhes sobre o funcionamento da integração, consulte o arquivo `INTEGRATION.md` (WIP).
+
+---
+
 ### Tratamento de Erros
 
 O tratamento de erros foi desenhado para ser centralizado e resiliente, especialmente no processamento em lote de múltiplos arquivos PDF:

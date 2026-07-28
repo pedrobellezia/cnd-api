@@ -33,6 +33,7 @@ cp .env.example .env
 | `POSTGRES_PASSWORD` | Senha do PostgreSQL (para Docker Compose).              | `password`                                                     |
 | `POSTGRES_DB`       | Nome do banco (para Docker Compose).                    | `mydb`                                                         |
 | `DB_PORT`           | Porta exposta pelo banco no host (para Docker Compose). | `5432`                                                         |
+| `CHECK_INTEGRATION` | Habilita a integração com o cnd-scraper. | `false`                                                        |
 
 ---
 
