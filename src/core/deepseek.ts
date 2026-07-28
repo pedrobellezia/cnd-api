@@ -1,4 +1,9 @@
 import axios from "axios";
+import rawPromptConfig from "./deepseek-prompt.json" with { type: "json" };
+import { promptConfigSchema } from "../schemas/deepseek.js";
+
+export const promptConfig = promptConfigSchema.parse(rawPromptConfig);
+
 
 export const deepseekClient = axios.create({
   baseURL: "https://api.deepseek.com/v1",

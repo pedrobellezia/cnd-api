@@ -1,4 +1,4 @@
-import { deepseekClient } from "../core/deepseek.js";
+import { deepseekClient, promptConfig } from "../core/deepseek.js";
 import { logger } from "../core/logger.js";
 import axios from "axios";
 import {
@@ -6,7 +6,6 @@ import {
   DeepSeekError,
   DeepSeekErrorType,
 } from "../errors/custom-errors.js";
-import promptConfig from "../core/deepseek-prompt.json" with { type: "json" };
 
 export type CndExtractionResult = {
   cnpj: string;
