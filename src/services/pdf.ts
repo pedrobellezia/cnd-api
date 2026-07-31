@@ -21,7 +21,13 @@ export type CndExtracted = {
 
 export class PdfService {
   static async extractCndData(buffer: Buffer): Promise<CndExtracted> {
-    const parser = new PDFParse(new Uint8Array(buffer));
+    const parser = new PDFParse({
+      data: new Uint8Array(buffer),
+      standardFontDataUrl: path.join(
+        process.cwd(),
+        "node_modules/pdfjs-dist/standard_fonts/",
+      ),
+    });
     let text: string;
     try {
       const parsedPdf = await parser.getText();
