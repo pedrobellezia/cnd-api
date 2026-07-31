@@ -17,9 +17,20 @@ services:
       timeout: 5s
       retries: 5
 
+  migration:
+    container_name: cnd-migration
+    build: .
+    command: npx prisma migrate deploy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+
   api:
     container_name: cnd-api
     build: .
+    command: node dist/index.js
     ports:
       - "${PORT}:${PORT}"
     environment:
@@ -34,6 +45,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     restart: unless-stopped
 
 volumes:
