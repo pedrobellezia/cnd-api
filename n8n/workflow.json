@@ -4,7 +4,7 @@
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT f.*\nFROM \"fornecedor\" f\nWHERE \n  (\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status IN  ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )\nLIMIT 1;",
+        "query": "SELECT\n    f.*,\n    'fgts' AS \"cndtype\"\nFROM \"fornecedor\" f\nWHERE \n  (\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  );",
         "options": {
           "queryReplacement": "={{ [$json.cnpj || null, '1 day', '1 day'] }}"
         }
@@ -12,16 +12,16 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1168,
-        128
+        144,
+        304
       ],
-      "id": "87edf709-c61f-48c9-aa17-813fdd3aa603",
+      "id": "f793eece-068f-446c-a5a0-65510654bc47",
       "name": "Buscar Fornecedor FGTS"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT f.*\nFROM \"fornecedor\" f\nWHERE \n  (\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'trabalhista'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'trabalhista'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )\nLIMIT 1;",
+        "query": "SELECT\n    f.*,\n    'trabalhista' AS \"cndtype\"\nFROM \"fornecedor\" f\nWHERE \n  (\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'trabalhista'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'trabalhista'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  );",
         "options": {
           "queryReplacement": "={{ [$json.cnpj || null, '3 day', '1 day'] }}"
         }
@@ -29,16 +29,16 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1168,
-        320
+        144,
+        496
       ],
-      "id": "0328b3a3-1d8b-494e-9b66-9a820ba35454",
+      "id": "9ff9001c-97eb-4e89-a7bd-dab24c8ab130",
       "name": "Buscar Fornecedor Trabalhista"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT f.*\nFROM \"fornecedor\" f\nWHERE \n  ((\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'estadual'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'estadual'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )) AND EXISTS (\n    SELECT 1 \n    FROM \"estadual\" e\n    WHERE e.uf = f.uf\n  )\nLIMIT 1;\n\n\n",
+        "query": "SELECT\n    f.*,\n    'estadual' AS \"cndtype\"\nFROM \"fornecedor\" f\nWHERE \n  ((\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'estadual'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'estadual'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )) AND EXISTS (\n    SELECT 1 \n    FROM \"estadual\" e\n    WHERE e.uf = f.uf\n  );",
         "options": {
           "queryReplacement": "={{ [$json.cnpj || null, '3 day', '2 day'] }}"
         }
@@ -46,79 +46,27 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1168,
-        512
+        144,
+        688
       ],
-      "id": "77d036b1-3a28-44d8-8324-82acf627b53b",
+      "id": "f05969e5-54fb-4179-a3d2-b8b0bf6c0a30",
       "name": "Buscar Fornecedor Estadual"
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.first();\n\nif (item?.binary?.data) {\n  return [{\n    json: {\n      success: true\n    },\n    binary: item.binary\n  }];\n}\n\nconst errorJson = item?.json || {};\n\nreturn [{\n  json: {\n    success: false,\n    ...errorJson\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -720,
-        128
-      ],
-      "id": "616d4954-6116-4514-bb86-de8097ba77e5",
-      "name": "Processar FGTS"
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first();\n\nif (item?.binary?.data) {\n  return [{\n    json: {\n      success: true\n    },\n    binary: item.binary\n  }];\n}\n\nconst errorJson = item?.json || {};\n\nreturn [{\n  json: {\n    success: false,\n    ...errorJson\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -720,
-        320
-      ],
-      "id": "ac0f647f-6baa-49c2-b353-08f59d95d1d9",
-      "name": "Processar Trabalhista"
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first();\n\nif (item?.binary?.data) {\n  return [{\n    json: {\n      success: true\n    },\n    binary: item.binary\n  }];\n}\n\nconst errorJson = item?.json || {};\n\nreturn [{\n  json: {\n    success: false,\n    ...errorJson\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -720,
-        512
-      ],
-      "id": "cf285237-24fc-430d-a282-5e3a7a891814",
-      "name": "Processar Estadual"
-    },
-    {
-      "parameters": {
-        "jsCode": "const item = $input.first();\n\nif (item?.binary?.data) {\n  return [{\n    json: {\n      success: true\n    },\n    binary: item.binary\n  }];\n}\n\nconst errorJson = item?.json || {};\n\nreturn [{\n  json: {\n    success: false,\n    ...errorJson\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -720,
-        704
-      ],
-      "id": "717ec1a1-1986-4f12-aeee-284fa810c457",
-      "name": "Processar Municipal"
-    },
-    {
-      "parameters": {
         "operation": "executeQuery",
-        "query": "\nSELECT f.*\nFROM \"fornecedor\" f\nWHERE \n  ((\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'municipal'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'municipal'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )) AND EXISTS (\n    SELECT 1 \n    FROM \"municipal\" m \n    WHERE m.municipio = f.municipio \n      AND m.uf = f.uf\n  )\nLIMIT 1;",
+        "query": "SELECT\n    f.*,\n    'municipal' AS \"cndtype\"\nFROM \"fornecedor\" f\nWHERE \n  ((\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'municipal'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'municipal'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  )) AND EXISTS (\n    SELECT 1 \n    FROM \"municipal\" m \n    WHERE m.municipio = f.municipio \n      AND m.uf = f.uf\n  );",
         "options": {
-          "queryReplacement": "={{ [$json.cnpj || null, '3 day', '2 day'] }}"
+          "queryReplacement": "={{ [$json.cnpj || null, '3 day', '12 hours'] }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -1168,
-        704
+        144,
+        880
       ],
-      "id": "5a6bdca7-589b-439e-bf5d-e60547ba7b7a",
+      "id": "7691be38-bcb4-4f9d-99f2-b7cfdd7bcdb4",
       "name": "Buscar Fornecedor Municipal"
     },
     {
@@ -130,8 +78,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -1616,
-        512
+        -304,
+        688
       ],
       "id": "ed2ad0c8-5f9e-46f7-9afb-a27aa3f02d4c",
       "name": "Webhook CND",
@@ -154,10 +102,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1392,
-        416
+        -80,
+        592
       ],
-      "id": "91abde0f-3930-41e9-ae49-f1bc36608507",
+      "id": "4290c99f-7aa6-4670-ba22-347f93a76380",
       "name": "Preparar Entrada"
     },
     {
@@ -175,15 +123,24 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "={{ CND_API_KEY }}"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.3,
       "position": [
-        -48,
-        560
+        1264,
+        736
       ],
-      "id": "d66be688-97e9-45b8-a3f6-6bb7e4045f1b",
+      "id": "7cb6b5d3-5229-4f3c-a193-5e71585bccc7",
       "name": "Salvar CND"
     },
     {
@@ -193,10 +150,10 @@
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
       "position": [
-        1072,
-        512
+        2384,
+        576
       ],
-      "id": "fbce0c9c-508e-4cd7-ada8-51c7e465c0eb",
+      "id": "b403a0f0-6b46-4a5e-8b86-95f121c970dd",
       "name": "Parar com Erro"
     },
     {
@@ -205,11 +162,7 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 */30 20-23 * * *"
-            },
-            {
-              "field": "cronExpression",
-              "expression": "0 */30 0-5 * * *"
+              "expression": "0 5 4 * * *"
             }
           ]
         }
@@ -217,148 +170,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -1616,
-        320
+        -304,
+        496
       ],
-      "id": "501b8e72-df58-4c19-ba4c-16f710fa22f1",
+      "id": "c93cf559-6ec2-4908-8bfb-9176ffe7cc27",
       "name": "Agendador"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://${SCRAPER_HOST}:${PORT}/fgts",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ SCRAPER_TOKEN }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"cnpj\": \"{{ $json.cnpj }}\"\n} ",
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -944,
-        128
-      ],
-      "id": "c9e304f2-b43c-418a-8996-970533dfa508",
-      "name": "Baixar FGTS",
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://${SCRAPER_HOST}:${PORT}/trabalhista",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ SCRAPER_TOKEN }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"cnpj\": \"{{ $json.cnpj }}\"\n} ",
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -944,
-        320
-      ],
-      "id": "cce8b0ed-6e00-4543-8e08-5f3fb5ecbd8b",
-      "name": "Baixar Trabalhista",
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://${SCRAPER_HOST}:${PORT}/estadual",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ SCRAPER_TOKEN }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"cnpj\": \"{{ $json.cnpj }}\",\n  \"uf\": \"{{ $json.uf }}\"\n} ",
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -944,
-        512
-      ],
-      "id": "0bdb4072-1cbf-4cb3-b100-9cceab113157",
-      "name": "Baixar Estadual ",
-      "onError": "continueRegularOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "http://${SCRAPER_HOST}:${PORT}/municipal",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ SCRAPER_TOKEN }}"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"cnpj\": \"{{ $json.cnpj }}\",\n  \"uf\": \"{{ $json.uf }}\",\n  \"municipio\": \"{{ $json.municipio }}\"\n} ",
-        "options": {
-          "response": {
-            "response": {
-              "neverError": true
-            }
-          }
-        }
-      },
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.3,
-      "position": [
-        -944,
-        704
-      ],
-      "id": "c9f37ca3-ca71-4f88-befd-43bbbffb2057",
-      "name": "Baixar Municipal",
-      "retryOnFail": false,
-      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -367,10 +183,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        192,
-        480
+        1488,
+        656
       ],
-      "id": "ce4fd2d1-acd3-4f50-8100-113b1aa0570a",
+      "id": "ef5d501d-49a7-4971-b880-e17b5bfc3dd2",
       "name": "Unir Resultado"
     },
     {
@@ -384,10 +200,10 @@
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        -48,
-        272
+        1264,
+        448
       ],
-      "id": "4766e18c-ecc8-497c-bb16-55dd061c2394",
+      "id": "7e1c3d7a-34dc-4b5b-b9ac-caa79dc3d347",
       "name": "Buscar Erro Existente",
       "alwaysOutputData": true
     },
@@ -398,10 +214,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        640,
-        496
+        1936,
+        672
       ],
-      "id": "ca6d4f90-b5d0-4653-91a0-af1af38cc364",
+      "id": "587820f7-4c6a-4e78-8154-a941e54e81f7",
       "name": "Responder Webhook"
     },
     {
@@ -432,10 +248,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        864,
-        496
+        2160,
+        576
       ],
-      "id": "1dbdd447-f776-4ea0-a57c-b755ce282fbe",
+      "id": "533bcb2c-1d4e-457f-82ba-146a5139dadc",
       "name": "Se Há Erros"
     },
     {
@@ -447,11 +263,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -1424,
-        -176
+        0,
+        0
       ],
       "typeVersion": 1,
-      "id": "1885f996-95f3-4643-ac1b-1f1a31d3e408",
+      "id": "4c20c8e2-bf22-4b08-8d2c-aff0ddd54941",
       "name": "Sticky Note"
     },
     {
@@ -463,25 +279,12 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -416,
-        240
+        944,
+        416
       ],
       "typeVersion": 1,
-      "id": "02f90da8-4869-4ae4-8f69-8b9089f67b78",
+      "id": "b71e4899-efda-4cc4-a564-ed4c097bf0de",
       "name": "Sticky Note1"
-    },
-    {
-      "parameters": {
-        "numberInputs": 4
-      },
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
-      "position": [
-        -496,
-        384
-      ],
-      "id": "601610d4-7ebb-4c5b-9697-cc48fb21d60d",
-      "name": "Unir Certidoes"
     },
     {
       "parameters": {
@@ -490,11 +293,91 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        416,
-        496
+        1712,
+        672
       ],
-      "id": "2446557f-1868-4c5d-8d87-1eda37a666ca9",
+      "id": "317c0c6c-1abf-42c2-b896-2be8dae81083",
       "name": "Preparar Resposta"
+    },
+    {
+      "parameters": {
+        "content": "## Node: Buscar Erro Existente\n-------\n• Se já existir uma CND com status \"error\", apenas atualiza o createdAt.\n• Caso contrário, insere um novo registro com status \"error\".\n",
+        "width": 352,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1264,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "78282958-9e07-4d63-9e2f-e74a5d33258e",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        560
+      ],
+      "id": "3193620e-3d7f-42af-a91b-2cf23c1c2260",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://${SCRAPER_HOST}:${PORT}/{{ $json.cndtype }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ SCRAPER_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"cnpj\": \"{{ $json.cnpj }}\",\n  \"uf\": \"{{ $json.uf }}\",\n  \"municipio\": \"{{ $json.municipio }}\"\n\n} ",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchInterval": 120000
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        592,
+        592
+      ],
+      "id": "d5edaa31-fb5e-49ad-bcc3-f35f10b38f9c",
+      "name": "Baixar CND",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  if (item.binary?.data) {\n    return {\n      json: {\n        success: true\n      },\n      binary: item.binary\n    };\n  }\n\n  return {\n    json: {\n      success: false,\n      ...item.json\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        592
+      ],
+      "id": "8a3c2e23-b6df-4dc5-9d40-48747f838805",
+      "name": "Processar CND"
     },
     {
       "parameters": {
@@ -544,56 +427,21 @@
                 ],
                 "combinator": "and"
               }
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 3
-                },
-                "conditions": [
-                  {
-                    "id": "0175d4c4-4ca7-49db-8ee7-d22a332bd69f",
-                    "leftValue": "={{ $json.error }}",
-                    "rightValue": "=^(ElementNotFound|TimeoutError|DownloadError|ScrapError|CaptchaError|CndUnavailable)$",
-                    "operator": {
-                      "type": "string",
-                      "operation": "notRegex"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              }
             }
           ]
         },
-        "options": {}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        -272,
-        400
+        1040,
+        576
       ],
-      "id": "40ec99a4-4eba-4c3e-b5e4-682aede80ce1",
+      "id": "2853a856-fd7e-4171-b250-6f909c2013db",
       "name": "Verificar Erro"
-    },
-    {
-      "parameters": {
-        "content": "## Node: Buscar Erro Existente\n-------\n• Se já existir uma CND com status \"error\", apenas atualiza o createdAt.\n• Caso contrário, insere um novo registro com status \"error\".\n",
-        "width": 352,
-        "color": 7
-      },
-      "type": "n8n-nodes-base.stickyNote",
-      "position": [
-        -160,
-        48
-      ],
-      "typeVersion": 1,
-      "id": "3f581f06-f91b-4b4f-a7ab-18c3ce8f8121",
-      "name": "Sticky Note2"
     }
   ],
   "pinData": {},
@@ -602,7 +450,7 @@
       "main": [
         [
           {
-            "node": "Baixar FGTS",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -613,9 +461,9 @@
       "main": [
         [
           {
-            "node": "Baixar Trabalhista",
+            "node": "Merge",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -624,53 +472,9 @@
       "main": [
         [
           {
-            "node": "Baixar Estadual ",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Processar FGTS": {
-      "main": [
-        [
-          {
-            "node": "Unir Certidoes",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Processar Municipal": {
-      "main": [
-        [
-          {
-            "node": "Unir Certidoes",
-            "type": "main",
-            "index": 3
-          }
-        ]
-      ]
-    },
-    "Processar Estadual": {
-      "main": [
-        [
-          {
-            "node": "Unir Certidoes",
+            "node": "Merge",
             "type": "main",
             "index": 2
-          }
-        ]
-      ]
-    },
-    "Processar Trabalhista": {
-      "main": [
-        [
-          {
-            "node": "Unir Certidoes",
-            "type": "main",
-            "index": 1
           }
         ]
       ]
@@ -679,9 +483,9 @@
       "main": [
         [
           {
-            "node": "Baixar Municipal",
+            "node": "Merge",
             "type": "main",
-            "index": 0
+            "index": 3
           }
         ]
       ]
@@ -745,50 +549,6 @@
         ]
       ]
     },
-    "Baixar FGTS": {
-      "main": [
-        [
-          {
-            "node": "Processar FGTS",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Baixar Trabalhista": {
-      "main": [
-        [
-          {
-            "node": "Processar Trabalhista",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Baixar Estadual ": {
-      "main": [
-        [
-          {
-            "node": "Processar Estadual",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Baixar Municipal": {
-      "main": [
-        [
-          {
-            "node": "Processar Municipal",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Unir Resultado": {
       "main": [
         [
@@ -823,22 +583,44 @@
         ]
       ]
     },
-    "Unir Certidoes": {
+    "Preparar Resposta": {
       "main": [
         [
           {
-            "node": "Verificar Erro",
+            "node": "Responder Webhook",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Preparar Resposta": {
+    "Merge": {
       "main": [
         [
           {
-            "node": "Responder Webhook",
+            "node": "Baixar CND",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Baixar CND": {
+      "main": [
+        [
+          {
+            "node": "Processar CND",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Processar CND": {
+      "main": [
+        [
+          {
+            "node": "Verificar Erro",
             "type": "main",
             "index": 0
           }
@@ -879,15 +661,13 @@
   "active": false,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "46ac2746-35aa-4ac1-8065-4434868b5506",
+  "versionId": "bad464d1-3ddf-4761-bdec-afa127fec194",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "cd12f5b679a9e9b492bba3018cdb70b16049738d4a80b39d4a29efe20e4f6c17"
+    "templateCredsSetupCompleted": true
   },
   "nodeGroups": [],
-  "id": "wICcpU91e6J10xxU",
+  "id": "6UN2QeNag1tLvSR9",
   "tags": []
 }

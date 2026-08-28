@@ -48,16 +48,18 @@ flowchart LR
 
 O workflow do n8n pode ser iniciado de duas maneiras:
 1. **Webhook CND**: Chamada HTTP recebida para processar um CNPJ específico.
-2. **Agendador (Cron)**: Executado de forma recorrente das 20h às 23:30h e das 00:00h às 05:30h, a cada 30 minutos (expressões cron: `0 */30 20-23 * * *` e `0 */30 0-5 * * *`).
+2. **Agendador (Cron)**: Execução única diária, às 04:05 (expressão cron: `0 5 4 * * *`). Como cada query de fornecedor (passo A) já retorna todos os elegíveis de uma vez (sem `LIMIT`), uma única execução processa a fila inteira em lote, em vez de depender de disparos recorrentes a cada 30 minutos.
 
 ---
 
 #### A. Consulta e Fila de Prioridade (SQL queries no n8n)
 
-O workflow possui um nó do tipo **Postgres** para cada tipo de certidão (`fgts`, `trabalhista`, `estadual`, `municipal`). Cada nó busca apenas **um fornecedor** por vez com base em certos critérios:
+O workflow possui um nó do tipo **Postgres** para cada tipo de certidão (`fgts`, `trabalhista`, `estadual`, `municipal`). Cada nó devolve **todos os fornecedores elegíveis** daquele tipo (sem `LIMIT`), já com o tipo marcado na própria linha (`'fgts' AS "cndtype"`):
 
 ```sql
-SELECT f.*
+SELECT
+    f.*,
+    'fgts' AS "cndtype"
 FROM "fornecedor" f
 WHERE 
   (
@@ -75,9 +77,10 @@ WHERE
       WHERE c."fornecedorid" = f.id AND ct.name = 'fgts' AND c.status IN ('error', 'irregular')
         AND c."createdAt" >= NOW() - INTERVAL $3
     )
-  )
-LIMIT 1;
+  );
 ```
+
+Os quatro resultados (um por tipo de CND) são combinados por um nó **Merge** (`numberInputs: 4`) antes de seguir pro passo B.
 
 ##### Regras de Elegibilidade
 A query SQL avalia dois cenários principais (utilizando uma cláusula `OR` na condição principal):
@@ -103,21 +106,14 @@ A query SQL avalia dois cenários principais (utilizando uma cláusula `OR` na c
 
 ---
 
-#### B. Execução do Scraping (Chamadas HTTP)
+#### B. Execução do Scraping (Chamada HTTP única e dinâmica)
 
-Após localizar o fornecedor elegível, o n8n dispara uma requisição POST direcionada ao serviço `cnd-scraper` (`http://${SCRAPER_HOST}:${PORT}/<tipo-cnd>`) utilizando autenticação por token (`Authorization: Bearer <SCRAPER_TOKEN>`). O payload varia conforme o tipo da certidão:
-- **FGTS e Trabalhista**:
-  ```json
-  { "cnpj": "..." }
-  ```
-- **Estadual**:
-  ```json
-  { "cnpj": "...", "uf": "..." }
-  ```
-- **Municipal**:
-  ```json
-  { "cnpj": "...", "uf": "...", "municipio": "..." }
-  ```
+Diferente da versão anterior (um node HTTP por tipo de CND), agora um único node **"Baixar CND"** processa a fila combinada do passo A, item a item. A URL é montada dinamicamente a partir do `cndtype` de cada item (`http://${SCRAPER_HOST}:${PORT}/{{ $json.cndtype }}`), com autenticação por token (`Authorization: Bearer <SCRAPER_TOKEN>`). O payload é sempre o mesmo formato, com `cnpj`, `uf` e `municipio` (o scraper ignora os campos que não usa para o tipo em questão):
+```json
+{ "cnpj": "...", "uf": "...", "municipio": "..." }
+```
+
+Esse node processa os itens em lote com um intervalo de 2 minutos entre lotes (`batching.batchInterval: 120000`), evitando disparar todas as emissões pendentes de uma vez.
 
 ---
 
@@ -126,10 +122,7 @@ Após localizar o fornecedor elegível, o n8n dispara uma requisição POST dire
 O nó **"Verificar Erro"** (nó do tipo Switch no n8n) avalia o resultado retornado pelo `cnd-scraper` para determinar a próxima ação no fluxo:
 
 ##### 1. Caso de Sucesso (`success === true`)
-O scraper emite a certidão com sucesso e devolve o binário (PDF). O n8n envia os dados via multipart form-data para a CND API no endpoint `POST /cnd` (`http://${CND_HOST}:3030/cnd`) para salvar o registro regular no banco.
-
-> [!WARNING]
-> **Pendência:** a `cnd-api` passou a exigir o header `x-api-key` (variável `API_KEY`) em todas as rotas, exceto `/public`. O node **"Salvar CND"** em `n8n/workflow.json` ainda não envia esse header — a chamada vai receber `401 UNAUTHORIZED` até que o node seja atualizado com `headerParameters: { "x-api-key": "<valor de API_KEY>" }` na interface do n8n.
+O scraper emite a certidão com sucesso e devolve o binário (PDF). O n8n envia os dados via multipart form-data para a CND API no endpoint `POST /cnd` (`http://${CND_HOST}:3030/cnd`), incluindo o header `x-api-key` (`API_KEY`, exigido desde que a `cnd-api` passou a autenticar todas as rotas exceto `/public`), para salvar o registro regular no banco.
 
 ##### 2. Erros Conhecidos (Fila de Cooldown)
 Se a requisição retornar falha e o erro estiver incluso na seguinte lista:
