@@ -3,9 +3,23 @@ import { logger } from "../core/logger.js";
 import { DateTime } from "luxon";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
 import { PdfService } from "./pdf.js";
-import { NewCndInput, newCndSchema } from "../schemas/cnd.js";
+import { NewCndInput, newCndSchema, SearchCndInput } from "../schemas/cnd.js";
 
 import { normalizeCnpj } from "../utils/normalize.js";
+
+function startOfDaySp(iso?: string): Date | undefined {
+  if (!iso) return undefined;
+  return DateTime.fromISO(iso, { zone: "America/Sao_Paulo" })
+    .startOf("day")
+    .toJSDate();
+}
+
+function endOfDaySp(iso?: string): Date | undefined {
+  if (!iso) return undefined;
+  return DateTime.fromISO(iso, { zone: "America/Sao_Paulo" })
+    .endOf("day")
+    .toJSDate();
+}
 
 export interface ProcessFileResult {
   file: string;
@@ -91,6 +105,61 @@ export class CndService {
     );
 
     return createdCnd;
+  }
+
+  static async searchCnds(filters: SearchCndInput) {
+    const fornecedorFilter: Record<string, unknown> = {};
+    if (filters.cnpj) {
+      fornecedorFilter.cnpj = { in: filters.cnpj };
+    }
+    if (filters.name) {
+      fornecedorFilter.name = {
+        contains: filters.name,
+        mode: "insensitive" as const,
+      };
+    }
+
+    const where = {
+      ...(Object.keys(fornecedorFilter).length > 0 && {
+        fornecedor: fornecedorFilter,
+      }),
+      ...(filters.status && { status: { in: filters.status } }),
+      ...(filters.tipo && {
+        OR: filters.tipo.map((tipo) => ({
+          cndtype: { name: { equals: tipo, mode: "insensitive" as const } },
+        })),
+      }),
+      ...((filters.emissaoDe || filters.emissaoAte) && {
+        emissao: {
+          ...(filters.emissaoDe && { gte: startOfDaySp(filters.emissaoDe) }),
+          ...(filters.emissaoAte && { lte: endOfDaySp(filters.emissaoAte) }),
+        },
+      }),
+      ...((filters.validadeDe || filters.validadeAte) && {
+        validade: {
+          ...(filters.validadeDe && {
+            gte: startOfDaySp(filters.validadeDe),
+          }),
+          ...(filters.validadeAte && { lte: endOfDaySp(filters.validadeAte) }),
+        },
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.cnd.findMany({
+        where,
+        skip: filters.skip,
+        take: filters.limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          fornecedor: { select: { name: true, cnpj: true } },
+          cndtype: { select: { name: true } },
+        },
+      }),
+      prisma.cnd.count({ where }),
+    ]);
+
+    return { data, skip: filters.skip, limit: filters.limit, total };
   }
 
   static async getCndTypeIdByName(name: string) {

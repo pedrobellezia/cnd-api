@@ -180,6 +180,43 @@ cp .env.example .env
 
 ---
 
+#### Listar CNDs (com filtros)
+
+- **Rota:** `/cnd`
+- **Método:** `GET`
+- **Query Params (Filtros Opcionais):**
+  - `name` — busca parcial e case-insensitive pelo nome do fornecedor (ex: `name=exemp`).
+  - `cnpj` — um ou mais CNPJs. Repita o parâmetro (`cnpj=A&cnpj=B`) ou separe por vírgula (`cnpj=A,B`).
+  - `status` — um ou mais status (mesmo formato de `cnpj`, ex: `status=regular,irregular`).
+  - `tipo` — um ou mais tipos de CND (mesmo formato, ex: `tipo=fgts,municipal`), comparação case-insensitive.
+  - `emissaoDe` / `emissaoAte` — filtra pela data de emissão. Use só `emissaoDe` (a partir de), só `emissaoAte` (até), ou os dois juntos (intervalo). Formato `YYYY-MM-DD`.
+  - `validadeDe` / `validadeAte` — mesma lógica, para a data de validade.
+  - `skip` — quantos registros pular (padrão `0`).
+  - `limit` — quantos registros retornar (padrão `20`, máximo `100`).
+- **Retorno (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "file_name": "a1b2c3d4e5f6g7h8.pdf",
+        "validade": "2026-08-30T03:00:00.000Z",
+        "emissao": "2026-07-01T03:00:00.000Z",
+        "status": "regular",
+        "fornecedor": {
+          "name": "Empresa Exemplo LTDA",
+          "cnpj": "12345678000190"
+        },
+        "cndtype": { "name": "fgts" }
+      }
+    ],
+    "skip": 0,
+    "limit": 20,
+    "total": 1180
+  }
+  ```
+
+---
+
 #### Processamento e Upload de CND (PDF)
 
 - **Rota:** `/cnd`

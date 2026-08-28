@@ -3,6 +3,7 @@ import multer from "multer";
 import { CndService } from "../services/cnd.js";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
 import { mapError } from "../errors/mapError.js";
+import { searchCndSchema } from "../schemas/cnd.js";
 import { normalizeResponse } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
 import { cndRateLimit } from "../middlewares/rateLimit.js";
@@ -13,6 +14,19 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB por arquivo
 });
+
+cndRoute.get(
+  "/",
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const filters = await searchCndSchema.parseAsync(req.query);
+      const result = await CndService.searchCnds(filters);
+      res.status(200).json(normalizeResponse(result));
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 cndRoute.post(
   "/",
