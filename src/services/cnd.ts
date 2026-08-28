@@ -148,7 +148,7 @@ export class CndService {
     const [data, total] = await Promise.all([
       prisma.cnd.findMany({
         where,
-        skip: filters.skip,
+        skip: (filters.page - 1) * filters.limit,
         take: filters.limit,
         orderBy: { createdAt: "desc" },
         include: {
@@ -159,7 +159,13 @@ export class CndService {
       prisma.cnd.count({ where }),
     ]);
 
-    return { data, skip: filters.skip, limit: filters.limit, total };
+    return {
+      data,
+      page: filters.page,
+      limit: filters.limit,
+      total,
+      totalPages: Math.ceil(total / filters.limit),
+    };
   }
 
   static async getCndTypeIdByName(name: string) {

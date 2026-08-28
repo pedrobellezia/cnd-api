@@ -117,8 +117,8 @@ cp .env.example .env
   - `uf` — busca exata.
   - `municipio` — busca exata (após normalização).
   - `name` — busca parcial e case-insensitive (ex: `name=exemp` encontra "Empresa Exemplo LTDA").
-  - `skip` — quantos registros pular (padrão `0`).
-  - `limit` — quantos registros retornar (padrão `20`, máximo `100`).
+  - `page` — página atual (padrão `1`).
+  - `limit` — itens por página (padrão `20`, máximo `100`).
 - **Retorno (200 OK):**
   ```json
   {
@@ -130,9 +130,10 @@ cp .env.example .env
         "municipio": "BLUMENAU"
       }
     ],
-    "skip": 0,
+    "page": 1,
     "limit": 20,
-    "total": 57
+    "total": 57,
+    "totalPages": 3
   }
   ```
 
@@ -193,8 +194,8 @@ cp .env.example .env
   - `tipo` — um ou mais tipos de CND (mesmo formato, ex: `tipo=fgts,municipal`), comparação case-insensitive.
   - `emissaoDe` / `emissaoAte` — filtra pela data de emissão. Use só `emissaoDe` (a partir de), só `emissaoAte` (até), ou os dois juntos (intervalo). Formato `YYYY-MM-DD`.
   - `validadeDe` / `validadeAte` — mesma lógica, para a data de validade.
-  - `skip` — quantos registros pular (padrão `0`).
-  - `limit` — quantos registros retornar (padrão `20`, máximo `100`).
+  - `page` — página atual (padrão `1`).
+  - `limit` — itens por página (padrão `20`, máximo `100`).
 - **Retorno (200 OK):**
   ```json
   {
@@ -211,9 +212,10 @@ cp .env.example .env
         "cndtype": { "name": "fgts" }
       }
     ],
-    "skip": 0,
+    "page": 1,
     "limit": 20,
-    "total": 1180
+    "total": 1180,
+    "totalPages": 59
   }
   ```
 
