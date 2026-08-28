@@ -128,6 +128,9 @@ O nó **"Verificar Erro"** (nó do tipo Switch no n8n) avalia o resultado retorn
 ##### 1. Caso de Sucesso (`success === true`)
 O scraper emite a certidão com sucesso e devolve o binário (PDF). O n8n envia os dados via multipart form-data para a CND API no endpoint `POST /cnd` (`http://${CND_HOST}:3030/cnd`) para salvar o registro regular no banco.
 
+> [!WARNING]
+> **Pendência:** a `cnd-api` passou a exigir o header `x-api-key` (variável `API_KEY`) em todas as rotas, exceto `/public`. O node **"Salvar CND"** em `n8n/workflow.json` ainda não envia esse header — a chamada vai receber `401 UNAUTHORIZED` até que o node seja atualizado com `headerParameters: { "x-api-key": "<valor de API_KEY>" }` na interface do n8n.
+
 ##### 2. Erros Conhecidos (Fila de Cooldown)
 Se a requisição retornar falha e o erro estiver incluso na seguinte lista:
 ```regex

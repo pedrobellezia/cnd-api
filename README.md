@@ -12,6 +12,8 @@ A **CND API** é um serviço backend desenvolvido para o cadastro de fornecedore
 - **Banco de dados:** PostgreSQL
 - **IA:** [DeepSeek API](https://platform.deepseek.com/)
 
+Documentação adicional: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (fluxo interno, erros, estrutura de pastas) e [`docs/INTEGRATION.md`](docs/INTEGRATION.md) (integração com n8n e cnd-scraper).
+
 ---
 
 ## Variáveis de Ambiente (.env)
@@ -267,6 +269,7 @@ Em caso de falhas, a API retorna respostas em formato padronizado contendo o tip
 | Tipo de Erro (`type`)     | Status HTTP | Descrição                                                                                          |
 | :------------------------ | :---------: | :------------------------------------------------------------------------------------------------- |
 | `VALIDATION_ERROR`        |     400     | Os parâmetros ou dados de entrada não correspondem ao esquema validado via Zod.                    |
+| `UNAUTHORIZED`            |     401     | Header `x-api-key` ausente ou inválido.                                                            |
 | `NOT_FOUND`               |     404     | O fornecedor ou o tipo de CND informado não existe no sistema.                                     |
 | `CONFLICT`                |     409     | Tentativa de cadastrar um CNPJ que já está cadastrado no sistema.                                  |
 | `RATE_LIMIT_EXCEEDED`     |     429     | Excedido o limite de requisições em `POST /cnd` (`CND_RATE_LIMIT_WINDOW_MS`/`CND_RATE_LIMIT_MAX`). |

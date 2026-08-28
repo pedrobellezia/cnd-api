@@ -1,5 +1,15 @@
 # Dev Docs
 
+### Autenticação e Rate Limit
+
+Todas as rotas exigem o header `x-api-key` (variável `API_KEY`), exceto `/public` (arquivos estáticos, servidos sem auth de propósito).
+
+`POST /cnd` tem rate limit configurável via `CND_RATE_LIMIT_WINDOW_MS`/`CND_RATE_LIMIT_MAX` (padrão: 20 requisições/minuto por IP), já que cada arquivo processado gera uma chamada paga à API do DeepSeek.
+
+Detalhes de cada endpoint (query params, formato de resposta) estão no `README.md`.
+
+---
+
 ### Fluxo de Processamento de CND (Upload)
 
 ```mermaid
@@ -111,7 +121,8 @@ O tratamento de erros foi desenhado para ser centralizado e resiliente, especial
 
 1. **Erros Customizados**: Estão mapeados em `src/errors/custom-errors.ts` através de classes que estendem a classe base `BaseError` (como `AppError`, `DeepSeekError` e `PdfError`).
 2. **Processamento Individual de CNDs**: No endpoint `POST /cnd`, os erros no processamento de um arquivo individual são capturados isoladamente. Isso garante que se um dos arquivos falhar (por exemplo, arquivo não-PDF, CND vencida, fornecedor inexistente ou erro no DeepSeek), a API não quebre para os outros arquivos. A resposta conterá uma lista com o status de sucesso ou erro formatado para cada arquivo enviado.
-3. **Middleware Centralizado (`errorHandler`)**: Localizado em `src/errors/errorHandler.ts`, esse middleware captura erros não tratados, realiza a padronização do log (utilizando a biblioteca `pino`) e formata as respostas HTTP retornadas ao cliente, garantindo consistência na API.
+3. **Mapeamento Compartilhado (`mapError`)**: `src/errors/mapError.ts` converte qualquer erro (`BaseError`, `ZodError` ou genérico) em `{statusCode, type, message, details}`. É usado tanto pelo `errorHandler` global quanto pelo `catch` por arquivo em `POST /cnd`, evitando duas implementações divergentes.
+4. **Middleware Centralizado (`errorHandler`)**: Localizado em `src/errors/errorHandler.ts`, esse middleware usa o `mapError` acima, realiza a padronização do log (utilizando a biblioteca `pino`) e formata as respostas HTTP retornadas ao cliente, garantindo consistência na API.
 
 ---
 
@@ -128,9 +139,13 @@ src/
 │   └── logger.ts
 ├── errors/                   # Erros customizados e tratamento global de exceções
 │   ├── custom-errors.ts
-│   └── errorHandler.ts
+│   ├── errorHandler.ts
+│   └── mapError.ts           # Mapeamento compartilhado de erro -> {statusCode, type, message, details}
 ├── generated/                # Cliente e tipos gerados automaticamente pelo Prisma
 │   └── prisma/
+├── middlewares/               # Middlewares de auth e rate limit
+│   ├── apiKey.ts              # Exige header x-api-key (API_KEY) em todas as rotas, exceto /public
+│   └── rateLimit.ts           # Rate limit configurável (CND_RATE_LIMIT_*) em POST /cnd
 ├── routes/                   # Definição dos endpoints HTTP
 │   ├── cnd.ts
 │   └── fornecedor.ts
