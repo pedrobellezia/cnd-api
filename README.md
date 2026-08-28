@@ -12,7 +12,7 @@ A **CND API** é um serviço backend desenvolvido para o cadastro de fornecedore
 - **Banco de dados:** PostgreSQL
 - **IA:** [DeepSeek API](https://platform.deepseek.com/)
 
-Documentação adicional: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (fluxo interno, erros, estrutura de pastas) e [`docs/INTEGRATION.md`](docs/INTEGRATION.md) (integração com n8n e cnd-scraper).
+Documentação adicional: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) (fluxo interno, erros, estrutura de pastas) e [`docs/INTEGRATION.md`](docs/INTEGRATION.md) (integração com n8n e [cnd-scraper](https://github.com/pedrobellezia/cnd-scraper)).
 
 ---
 
