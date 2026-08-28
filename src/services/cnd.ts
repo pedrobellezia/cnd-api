@@ -117,80 +117,68 @@ export class CndService {
   static async processFiles(
     file: Express.Multer.File,
   ): Promise<ProcessFileResult> {
-    try {
-      const pdfBuffer = file.buffer;
-      const extracted = await PdfService.extractCndData(pdfBuffer);
+    const pdfBuffer = file.buffer;
+    const extracted = await PdfService.extractCndData(pdfBuffer);
 
-      if (!extracted.cnpj) {
-        throw new AppError(
-          AppErrorType.VALIDATION_ERROR,
-          "CNPJ não encontrado no PDF",
-        );
-      }
-      const normalizedCnpj = normalizeCnpj(extracted.cnpj);
-
-      const fornecedor = await prisma.fornecedor.findUnique({
-        where: { cnpj: normalizedCnpj },
-      });
-
-      if (!fornecedor) {
-        throw new AppError(
-          AppErrorType.NOT_FOUND,
-          "O fornecedor associado a esta CND não foi encontrado no banco de dados.",
-        );
-      }
-
-      const cndType = await this.getCndTypeIdByName(extracted.tipo);
-
-      if (!cndType) {
-        throw new AppError(
-          AppErrorType.VALIDATION_ERROR,
-          `Tipo de CND não suportado ("${extracted.tipo}")`,
-        );
-      }
-
-      const fileName = await PdfService.savePdf(pdfBuffer);
-
-      const validatedData = await newCndSchema.parseAsync({
-        fornecedorid: fornecedor.id,
-        cnpj: fornecedor.cnpj,
-        cndtypeid: cndType.id,
-        file_name: fileName,
-        validade: extracted.validade ?? undefined,
-        emissao: extracted.emissao ?? undefined,
-        status: extracted.status,
-      });
-
-      const cnd = await this.newCnd(validatedData);
-
-      return {
-        file: file.originalname,
-        success: true,
-        data: {
-          fornecedor: {
-            name: fornecedor.name,
-            cnpj: fornecedor.cnpj,
-          },
-          cnd: {
-            filename: cnd.file_name,
-            validade: cnd.validade,
-            emissao: cnd.emissao,
-            status: cnd.status,
-            tipo: cndType.name,
-          },
-        },
-      };
-    } catch (err: unknown) {
-      logger.error(
-        {
-          context: "CndService.processFiles",
-          file: file.originalname,
-          error: err instanceof Error ? err.message : String(err),
-        },
-        `Erro no processamento da CND`,
+    if (!extracted.cnpj) {
+      throw new AppError(
+        AppErrorType.VALIDATION_ERROR,
+        "CNPJ não encontrado no PDF",
       );
-      throw err;
     }
+    const normalizedCnpj = normalizeCnpj(extracted.cnpj);
+
+    const fornecedor = await prisma.fornecedor.findUnique({
+      where: { cnpj: normalizedCnpj },
+    });
+
+    if (!fornecedor) {
+      throw new AppError(
+        AppErrorType.NOT_FOUND,
+        "O fornecedor associado a esta CND não foi encontrado no banco de dados.",
+      );
+    }
+
+    const cndType = await this.getCndTypeIdByName(extracted.tipo);
+
+    if (!cndType) {
+      throw new AppError(
+        AppErrorType.VALIDATION_ERROR,
+        `Tipo de CND não suportado ("${extracted.tipo}")`,
+      );
+    }
+
+    const fileName = await PdfService.savePdf(pdfBuffer);
+
+    const validatedData = await newCndSchema.parseAsync({
+      fornecedorid: fornecedor.id,
+      cnpj: fornecedor.cnpj,
+      cndtypeid: cndType.id,
+      file_name: fileName,
+      validade: extracted.validade ?? undefined,
+      emissao: extracted.emissao ?? undefined,
+      status: extracted.status,
+    });
+
+    const cnd = await this.newCnd(validatedData);
+
+    return {
+      file: file.originalname,
+      success: true,
+      data: {
+        fornecedor: {
+          name: fornecedor.name,
+          cnpj: fornecedor.cnpj,
+        },
+        cnd: {
+          filename: cnd.file_name,
+          validade: cnd.validade,
+          emissao: cnd.emissao,
+          status: cnd.status,
+          tipo: cndType.name,
+        },
+      },
+    };
   }
 }
 export default CndService;
