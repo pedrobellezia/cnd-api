@@ -40,6 +40,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       NODE_ENV: production
+      CHECK_INTEGRATION: ${CHECK_INTEGRATION}
     volumes:
       - ./public:/app/public
     depends_on:
