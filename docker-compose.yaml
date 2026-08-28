@@ -43,6 +43,9 @@ services:
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       NODE_ENV: production
       CHECK_INTEGRATION: ${CHECK_INTEGRATION}
+      API_KEY: ${API_KEY}
+      CND_RATE_LIMIT_WINDOW_MS: ${CND_RATE_LIMIT_WINDOW_MS}
+      CND_RATE_LIMIT_MAX: ${CND_RATE_LIMIT_MAX}
     volumes:
       - ./public:/app/public
     depends_on:
