@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import fornecedorRoute from "./routes/fornecedor.js";
 import cndRoute from "./routes/cnd.js";
 import { logger } from "./core/logger.js";
@@ -10,6 +11,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use(helmet());
 app.set("query parser", "extended");
 
 // Middlewares
