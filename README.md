@@ -22,19 +22,21 @@ Copie o arquivo `.env.example` para `.env` e preencha as variáveis de ambiente 
 cp .env.example .env
 ```
 
-| Variável            | Descrição                                               | Exemplo                                                        |
-| :------------------ | :------------------------------------------------------ | :------------------------------------------------------------- |
-| `PORT`              | Porta de escuta da API.                                 | `3030`                                                         |
-| `HOST`              | Interface de rede na qual o Express iniciará.           | `0.0.0.0`                                                      |
-| `LOG_LEVEL`         | Nível mínimo de logging.                                | `debug`                                                        |
-| `DEEPSEEK_API_KEY`  | Chave de API do DeepSeek.                               | `sk-cnd...`                                                    |
-| `API_KEY`           | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`). | `um-segredo-qualquer`                          |
-| `DATABASE_URL`      | URL para conexão com o banco de dados PostgreSQL.       | `postgresql://user:password@localhost:5432/mydb?schema=public` |
-| `POSTGRES_USER`     | Usuário do PostgreSQL (para Docker Compose).            | `user`                                                         |
-| `POSTGRES_PASSWORD` | Senha do PostgreSQL (para Docker Compose).              | `password`                                                     |
-| `POSTGRES_DB`       | Nome do banco (para Docker Compose).                    | `mydb`                                                         |
-| `DB_PORT`           | Porta exposta pelo banco no host (para Docker Compose). | `5432`                                                         |
-| `CHECK_INTEGRATION` | Habilita a integração com o cnd-scraper. | `false`                                                        |
+| Variável                   | Descrição                                                                             | Exemplo                                                        |
+| :------------------------- | :------------------------------------------------------------------------------------ | :------------------------------------------------------------- |
+| `PORT`                     | Porta de escuta da API.                                                               | `3030`                                                         |
+| `HOST`                     | Interface de rede na qual o Express iniciará.                                         | `0.0.0.0`                                                      |
+| `LOG_LEVEL`                | Nível mínimo de logging.                                                              | `debug`                                                        |
+| `DEEPSEEK_API_KEY`         | Chave de API do DeepSeek.                                                             | `sk-cnd...`                                                    |
+| `API_KEY`                  | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
+| `CND_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd`, em ms. Opcional (padrão `60000`).     | `60000`                                                        |
+| `CND_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd`. Opcional (padrão `20`). | `20`                                                           |
+| `DATABASE_URL`             | URL para conexão com o banco de dados PostgreSQL.                                     | `postgresql://user:password@localhost:5432/mydb?schema=public` |
+| `POSTGRES_USER`            | Usuário do PostgreSQL (para Docker Compose).                                          | `user`                                                         |
+| `POSTGRES_PASSWORD`        | Senha do PostgreSQL (para Docker Compose).                                            | `password`                                                     |
+| `POSTGRES_DB`              | Nome do banco (para Docker Compose).                                                  | `mydb`                                                         |
+| `DB_PORT`                  | Porta exposta pelo banco no host (para Docker Compose).                               | `5432`                                                         |
+| `CHECK_INTEGRATION`        | Habilita a integração com o cnd-scraper.                                              | `false`                                                        |
 
 ---
 
@@ -204,16 +206,17 @@ Em caso de falhas, a API retorna respostas em formato padronizado contendo o tip
 
 ### Mapeamento de Erros da API
 
-| Tipo de Erro (`type`)     | Status HTTP | Descrição                                                                                     |
-| :------------------------ | :---------: | :-------------------------------------------------------------------------------------------- |
-| `VALIDATION_ERROR`        |     400     | Os parâmetros ou dados de entrada não correspondem ao esquema validado via Zod.               |
-| `NOT_FOUND`               |     404     | O fornecedor ou o tipo de CND informado não existe no sistema.                                |
-| `CONFLICT`                |     409     | Tentativa de cadastrar um CNPJ que já está cadastrado no sistema.                             |
-| `EXPIRED_CND`             |     400     | A CND enviada já está expirada, sendo rejeitada pelo sistema.                                 |
-| `EMPTY_OR_UNREADABLE`     |     400     | O arquivo PDF enviado está vazio ou não possui texto legível por OCR/Parser.                  |
-| `ANALYSIS_ERROR`          |     400     | A IA não conseguiu identificar ou validar a situação fiscal do contribuinte principal no PDF. |
-| `CREDENTIALS_ERROR`       |     500     | Erro relacionado à chave de API do DeepSeek ou limites de crédito na plataforma.              |
-| `CONFIGURATION_ERROR`     |     500     | Erro de configuração nos parâmetros da integração com o DeepSeek.                             |
-| `API_COMMUNICATION_ERROR` |     502     | Falha física na comunicação de rede com os servidores do DeepSeek.                            |
-| `INVALID_RESPONSE`        |     502     | Resposta recebida da API do DeepSeek é inválida ou malformada.                                |
-| `INTERNAL_ERROR`          |     500     | Erro genérico de execução interno do servidor.                                                |
+| Tipo de Erro (`type`)     | Status HTTP | Descrição                                                                                          |
+| :------------------------ | :---------: | :------------------------------------------------------------------------------------------------- |
+| `VALIDATION_ERROR`        |     400     | Os parâmetros ou dados de entrada não correspondem ao esquema validado via Zod.                    |
+| `NOT_FOUND`               |     404     | O fornecedor ou o tipo de CND informado não existe no sistema.                                     |
+| `CONFLICT`                |     409     | Tentativa de cadastrar um CNPJ que já está cadastrado no sistema.                                  |
+| `RATE_LIMIT_EXCEEDED`     |     429     | Excedido o limite de requisições em `POST /cnd` (`CND_RATE_LIMIT_WINDOW_MS`/`CND_RATE_LIMIT_MAX`). |
+| `EXPIRED_CND`             |     400     | A CND enviada já está expirada, sendo rejeitada pelo sistema.                                      |
+| `EMPTY_OR_UNREADABLE`     |     400     | O arquivo PDF enviado está vazio ou não possui texto legível por OCR/Parser.                       |
+| `ANALYSIS_ERROR`          |     400     | A IA não conseguiu identificar ou validar a situação fiscal do contribuinte principal no PDF.      |
+| `CREDENTIALS_ERROR`       |     500     | Erro relacionado à chave de API do DeepSeek ou limites de crédito na plataforma.                   |
+| `CONFIGURATION_ERROR`     |     500     | Erro de configuração nos parâmetros da integração com o DeepSeek.                                  |
+| `API_COMMUNICATION_ERROR` |     502     | Falha física na comunicação de rede com os servidores do DeepSeek.                                 |
+| `INVALID_RESPONSE`        |     502     | Resposta recebida da API do DeepSeek é inválida ou malformada.                                     |
+| `INTERNAL_ERROR`          |     500     | Erro genérico de execução interno do servidor.                                                     |
