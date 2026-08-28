@@ -27,6 +27,7 @@ export enum AppErrorType {
   FORBIDDEN = "FORBIDDEN",
   INTERNAL_ERROR = "INTERNAL_ERROR",
   EXPIRED_CND = "EXPIRED_CND",
+  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
 }
 
 export const AppErrorMap: Record<AppErrorType, number> = {
@@ -37,6 +38,7 @@ export const AppErrorMap: Record<AppErrorType, number> = {
   [AppErrorType.FORBIDDEN]: 403,
   [AppErrorType.INTERNAL_ERROR]: 500,
   [AppErrorType.EXPIRED_CND]: 400,
+  [AppErrorType.RATE_LIMIT_EXCEEDED]: 429,
 };
 
 export class AppError extends BaseError<AppErrorType> {

@@ -5,6 +5,7 @@ import { AppError, AppErrorType, BaseError } from "../errors/custom-errors.js";
 import { normalizeResponse } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
 import { ZodError } from "zod";
+import { cndRateLimit } from "../middlewares/rateLimit.js";
 
 const cndRoute = Router();
 
@@ -15,6 +16,7 @@ const upload = multer({
 
 cndRoute.post(
   "/",
+  cndRateLimit,
   upload.array("file"),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
