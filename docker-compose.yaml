@@ -19,6 +19,7 @@ services:
 
   migration:
     container_name: cnd-migration
+    image: cnd-api:latest
     build: .
     command: npx prisma migrate deploy
     environment:
@@ -29,6 +30,7 @@ services:
 
   api:
     container_name: cnd-api
+    image: cnd-api:latest
     build: .
     command: node dist/index.js
     ports:
