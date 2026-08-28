@@ -1,10 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
 import multer from "multer";
 import { CndService } from "../services/cnd.js";
-import { AppError, AppErrorType, BaseError } from "../errors/custom-errors.js";
+import { AppError, AppErrorType } from "../errors/custom-errors.js";
+import { mapError } from "../errors/mapError.js";
 import { normalizeResponse } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
-import { ZodError } from "zod";
 import { cndRateLimit } from "../middlewares/rateLimit.js";
 
 const cndRoute = Router();
@@ -41,35 +41,13 @@ cndRoute.post(
         try {
           const rs = await CndService.processFiles(file);
           results.push(rs);
-        } catch (err: any) {
+        } catch (err: unknown) {
           logger.warn(
             { context: "cndRoute.post", file: file.originalname, error: err },
             "Falha no processamento de arquivo de CND",
           );
 
-          let type = "INTERNAL_ERROR";
-          let message = "Erro interno do servidor";
-          let details: Record<string, unknown> | undefined = undefined;
-
-          if (err instanceof BaseError) {
-            type = err.type;
-            message = err.message;
-            details = err.details;
-          } else if (err instanceof ZodError) {
-            type = "VALIDATION_ERROR";
-            message = "Erro de validação dos dados de entrada";
-            details = Object.fromEntries(
-              err.issues.map((issue) => [issue.path.join("."), issue.message]),
-            );
-          } else {
-            message = err.message || message;
-            if (process.env.NODE_ENV !== "production") {
-              details = {
-                originalMessage: err.message,
-                stack: err.stack,
-              };
-            }
-          }
+          const { type, message, details } = mapError(err);
 
           results.push({
             file: file.originalname,
