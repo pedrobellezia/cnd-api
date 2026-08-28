@@ -115,8 +115,8 @@ cp .env.example .env
   - `uf` — busca exata.
   - `municipio` — busca exata (após normalização).
   - `name` — busca parcial e case-insensitive (ex: `name=exemp` encontra "Empresa Exemplo LTDA").
-  - `page` — página atual (padrão `1`).
-  - `pageSize` — itens por página (padrão `20`, máximo `100`).
+  - `skip` — quantos registros pular (padrão `0`).
+  - `limit` — quantos registros retornar (padrão `20`, máximo `100`).
 - **Retorno (200 OK):**
   ```json
   {
@@ -128,10 +128,9 @@ cp .env.example .env
         "municipio": "BLUMENAU"
       }
     ],
-    "page": 1,
-    "pageSize": 20,
-    "total": 57,
-    "totalPages": 3
+    "skip": 0,
+    "limit": 20,
+    "total": 57
   }
   ```
 

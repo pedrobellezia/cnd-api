@@ -78,8 +78,8 @@ export const searchFornecedorSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? normalizeMunicipio(val) : undefined)),
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  skip: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
 });
 
 export type NewFornecedorInput = z.infer<typeof newFornecedorSchema>;

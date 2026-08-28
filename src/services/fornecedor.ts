@@ -58,8 +58,8 @@ export class FornecedorService {
     const [data, total] = await Promise.all([
       prisma.fornecedor.findMany({
         where,
-        skip: (filters.page - 1) * filters.pageSize,
-        take: filters.pageSize,
+        skip: filters.skip,
+        take: filters.limit,
         orderBy: { name: "asc" },
       }),
       prisma.fornecedor.count({ where }),
@@ -67,10 +67,9 @@ export class FornecedorService {
 
     return {
       data,
-      page: filters.page,
-      pageSize: filters.pageSize,
+      skip: filters.skip,
+      limit: filters.limit,
       total,
-      totalPages: Math.ceil(total / filters.pageSize),
     };
   }
 
