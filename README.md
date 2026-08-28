@@ -110,8 +110,30 @@ cp .env.example .env
 
 - **Rota:** `/fornecedor`
 - **Método:** `GET`
-- **Query Params (Filtros Opcionais):** `cnpj`, `uf`, `municipio`
-- **Retorno (200 OK):** Retorna uma lista de fornecedores correspondentes aos filtros aplicados.
+- **Query Params (Filtros Opcionais):**
+  - `cnpj` — busca exata (após normalização).
+  - `uf` — busca exata.
+  - `municipio` — busca exata (após normalização).
+  - `name` — busca parcial e case-insensitive (ex: `name=exemp` encontra "Empresa Exemplo LTDA").
+  - `page` — página atual (padrão `1`).
+  - `pageSize` — itens por página (padrão `20`, máximo `100`).
+- **Retorno (200 OK):**
+  ```json
+  {
+    "data": [
+      {
+        "cnpj": "12345678000190",
+        "name": "Empresa Exemplo LTDA",
+        "uf": "SC",
+        "municipio": "BLUMENAU"
+      }
+    ],
+    "page": 1,
+    "pageSize": 20,
+    "total": 57,
+    "totalPages": 3
+  }
+  ```
 
 ---
 

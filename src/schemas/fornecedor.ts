@@ -69,11 +69,17 @@ export const searchFornecedorSchema = z.object({
     .string()
     .optional()
     .transform((val) => (val ? normalizeCnpj(val) : undefined)),
+  name: z
+    .string()
+    .optional()
+    .transform((val) => (val ? val.trim() : undefined)),
   uf: ufSchema.optional(),
   municipio: z
     .string()
     .optional()
     .transform((val) => (val ? normalizeMunicipio(val) : undefined)),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
 export type NewFornecedorInput = z.infer<typeof newFornecedorSchema>;

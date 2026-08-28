@@ -46,13 +46,32 @@ export class FornecedorService {
   }
 
   static async listFornecedores(filters: SearchFornecedorInput) {
-    return prisma.fornecedor.findMany({
-      where: {
-        cnpj: filters.cnpj,
-        uf: filters.uf,
-        municipio: filters.municipio,
-      },
-    });
+    const where = {
+      cnpj: filters.cnpj,
+      uf: filters.uf,
+      municipio: filters.municipio,
+      ...(filters.name && {
+        name: { contains: filters.name, mode: "insensitive" as const },
+      }),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.fornecedor.findMany({
+        where,
+        skip: (filters.page - 1) * filters.pageSize,
+        take: filters.pageSize,
+        orderBy: { name: "asc" },
+      }),
+      prisma.fornecedor.count({ where }),
+    ]);
+
+    return {
+      data,
+      page: filters.page,
+      pageSize: filters.pageSize,
+      total,
+      totalPages: Math.ceil(total / filters.pageSize),
+    };
   }
 
   static async getFornecedorWithCnds(cnpj: string) {
@@ -125,17 +144,17 @@ export class FornecedorService {
         !r.file_name || (!!r.validade && new Date(r.validade) < new Date());
       let status = r.status ?? null;
 
-        if (isExpired && status !== "error" && checkIntegration) {
-          if (!estadoExists && r.tipo === "estadual") {
-            status = "em desenvolvimento";
-          }
-          if (!municipioExists && r.tipo === "municipal") {
-            status = "em desenvolvimento";
-          }
-          if (r.tipo === "federal") {
-            status = "em desenvolvimento";
-          }
+      if (isExpired && status !== "error" && checkIntegration) {
+        if (!estadoExists && r.tipo === "estadual") {
+          status = "em desenvolvimento";
         }
+        if (!municipioExists && r.tipo === "municipal") {
+          status = "em desenvolvimento";
+        }
+        if (r.tipo === "federal") {
+          status = "em desenvolvimento";
+        }
+      }
 
       if (isExpired) {
         cnd.push({
