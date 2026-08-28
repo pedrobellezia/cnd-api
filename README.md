@@ -28,6 +28,7 @@ cp .env.example .env
 | `HOST`              | Interface de rede na qual o Express iniciará.           | `0.0.0.0`                                                      |
 | `LOG_LEVEL`         | Nível mínimo de logging.                                | `debug`                                                        |
 | `DEEPSEEK_API_KEY`  | Chave de API do DeepSeek.                               | `sk-cnd...`                                                    |
+| `API_KEY`           | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`). | `um-segredo-qualquer`                          |
 | `DATABASE_URL`      | URL para conexão com o banco de dados PostgreSQL.       | `postgresql://user:password@localhost:5432/mydb?schema=public` |
 | `POSTGRES_USER`     | Usuário do PostgreSQL (para Docker Compose).            | `user`                                                         |
 | `POSTGRES_PASSWORD` | Senha do PostgreSQL (para Docker Compose).              | `password`                                                     |

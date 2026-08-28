@@ -3,11 +3,13 @@ import { prisma } from "./core/database.js";
 import app from "./server.js";
 import { logger } from "./core/logger.js";
 
-["DATABASE_URL", "PORT", "HOST", "DEEPSEEK_API_KEY"].forEach((envVar) => {
-  if (!process.env[envVar]) {
-    throw new Error(`${envVar} is not defined`);
-  }
-});
+["DATABASE_URL", "PORT", "HOST", "DEEPSEEK_API_KEY", "API_KEY"].forEach(
+  (envVar) => {
+    if (!process.env[envVar]) {
+      throw new Error(`${envVar} is not defined`);
+    }
+  },
+);
 
 try {
   await prisma.$connect();
