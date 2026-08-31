@@ -36,6 +36,7 @@ export class DeepSeekService {
         temperature: cndPromptConfig.temperature,
         response_format: cndPromptConfig.response_format,
         max_tokens: deepseekMaxTokens,
+        thinking: { type: "disabled" },
         messages: [
           { role: "system", content: cndPromptConfig.system },
           { role: "user", content: text },
@@ -74,6 +75,7 @@ export class DeepSeekService {
         temperature: fornecedorPromptConfig.temperature,
         response_format: fornecedorPromptConfig.response_format,
         max_tokens: deepseekMaxTokens,
+        thinking: { type: "disabled" },
         messages: [
           { role: "system", content: fornecedorPromptConfig.system },
           { role: "user", content: text },
