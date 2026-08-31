@@ -2,10 +2,7 @@ services:
   db:
     container_name: cnd-postgres
     image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+    env_file: .env
     ports:
       - "${DB_PORT}:5432"
     volumes:
@@ -22,6 +19,7 @@ services:
     image: cnd-api:latest
     build: .
     command: npx prisma migrate deploy
+    env_file: .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     depends_on:
@@ -35,18 +33,10 @@ services:
     command: node dist/index.js
     ports:
       - "${PORT}:${PORT}"
+    env_file: .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      PORT: ${PORT}
-      HOST: ${HOST}
-      LOG_LEVEL: ${LOG_LEVEL}
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
       NODE_ENV: production
-      CHECK_INTEGRATION: ${CHECK_INTEGRATION}
-      API_KEY: ${API_KEY}
-      DEEPSEEK_RATE_LIMIT_WINDOW_MS: ${DEEPSEEK_RATE_LIMIT_WINDOW_MS}
-      DEEPSEEK_RATE_LIMIT_MAX: ${DEEPSEEK_RATE_LIMIT_MAX}
-      PDF_MAX_FILE_SIZE_MB: ${PDF_MAX_FILE_SIZE_MB}
     volumes:
       - ./public:/app/public
     depends_on:
