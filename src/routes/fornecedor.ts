@@ -1,5 +1,4 @@
 import { Router, Request, Response, NextFunction } from "express";
-import multer from "multer";
 import { FornecedorService } from "../services/fornecedor.js";
 import {
   newFornecedorSchema,
@@ -11,18 +10,14 @@ import { normalizeCnpj } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
 import { mapError } from "../errors/mapError.js";
 import { deepseekRateLimit } from "../middlewares/rateLimit.js";
+import { pdfUpload } from "../middlewares/upload.js";
 
 const fornecedorRoute = Router();
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB por arquivo
-});
 
 fornecedorRoute.post(
   "/pdf",
   deepseekRateLimit,
-  upload.array("file"),
+  pdfUpload.array("file"),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {

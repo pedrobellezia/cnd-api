@@ -6,6 +6,8 @@ Todas as rotas exigem o header `x-api-key` (variável `API_KEY`), exceto `/publi
 
 `POST /cnd` e `POST /fornecedor/pdf` compartilham o mesmo rate limit, configurável via `DEEPSEEK_RATE_LIMIT_WINDOW_MS`/`DEEPSEEK_RATE_LIMIT_MAX` (padrão: 20 requisições/minuto por IP), já que cada arquivo processado em qualquer uma das duas rotas gera uma chamada paga à API do DeepSeek.
 
+As duas rotas também compartilham o mesmo limite de tamanho por arquivo (Multer), configurável via `PDF_MAX_FILE_SIZE_MB` (padrão: `10` MB).
+
 Detalhes de cada endpoint (query params, formato de resposta) estão no `README.md`.
 
 ---
@@ -180,9 +182,10 @@ src/
 │   └── mapError.ts           # Mapeamento compartilhado de erro -> {statusCode, type, message, details}
 ├── generated/                # Cliente e tipos gerados automaticamente pelo Prisma
 │   └── prisma/
-├── middlewares/               # Middlewares de auth e rate limit
+├── middlewares/               # Middlewares de auth, rate limit e upload
 │   ├── apiKey.ts              # Exige header x-api-key (API_KEY) em todas as rotas, exceto /public
-│   └── rateLimit.ts           # Rate limit configurável (DEEPSEEK_RATE_LIMIT_*) em POST /cnd e POST /fornecedor/pdf
+│   ├── rateLimit.ts           # Rate limit configurável (DEEPSEEK_RATE_LIMIT_*) em POST /cnd e POST /fornecedor/pdf
+│   └── upload.ts              # Multer compartilhado com limite de tamanho (PDF_MAX_FILE_SIZE_MB) em POST /cnd e POST /fornecedor/pdf
 ├── routes/                   # Definição dos endpoints HTTP
 │   ├── cnd.ts
 │   └── fornecedor.ts

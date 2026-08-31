@@ -1,5 +1,4 @@
 import { Router, Request, Response, NextFunction } from "express";
-import multer from "multer";
 import { CndService } from "../services/cnd.js";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
 import { mapError } from "../errors/mapError.js";
@@ -7,13 +6,9 @@ import { searchCndSchema } from "../schemas/cnd.js";
 import { normalizeResponse } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
 import { deepseekRateLimit } from "../middlewares/rateLimit.js";
+import { pdfUpload } from "../middlewares/upload.js";
 
 const cndRoute = Router();
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB por arquivo
-});
 
 cndRoute.get(
   "/",
@@ -31,7 +26,7 @@ cndRoute.get(
 cndRoute.post(
   "/",
   deepseekRateLimit,
-  upload.array("file"),
+  pdfUpload.array("file"),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {

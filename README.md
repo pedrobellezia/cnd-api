@@ -33,6 +33,7 @@ cp .env.example .env
 | `API_KEY`                  | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
 | `DEEPSEEK_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd` e `POST /fornecedor/pdf`, em ms. Opcional (padrão `60000`). | `60000`                                          |
 | `DEEPSEEK_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `20`). | `20`                                     |
+| `PDF_MAX_FILE_SIZE_MB`     | Tamanho máximo (em MB) de cada PDF enviado em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `10`). | `10`                                                           |
 | `DATABASE_URL`             | URL para conexão com o banco de dados PostgreSQL.                                     | `postgresql://user:password@localhost:5432/mydb?schema=public` |
 | `POSTGRES_USER`            | Usuário do PostgreSQL (para Docker Compose).                                          | `user`                                                         |
 | `POSTGRES_PASSWORD`        | Senha do PostgreSQL (para Docker Compose).                                            | `password`                                                     |

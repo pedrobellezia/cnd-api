@@ -46,6 +46,7 @@ services:
       API_KEY: ${API_KEY}
       DEEPSEEK_RATE_LIMIT_WINDOW_MS: ${DEEPSEEK_RATE_LIMIT_WINDOW_MS}
       DEEPSEEK_RATE_LIMIT_MAX: ${DEEPSEEK_RATE_LIMIT_MAX}
+      PDF_MAX_FILE_SIZE_MB: ${PDF_MAX_FILE_SIZE_MB}
     volumes:
       - ./public:/app/public
     depends_on:
