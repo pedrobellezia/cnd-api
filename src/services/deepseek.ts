@@ -48,6 +48,7 @@ export class DeepSeekService {
         throw new DeepSeekError(
           DeepSeekErrorType.ANALYSIS_ERROR,
           parsed.error || "Falha na extração de dados do documento",
+          parsed.details,
         );
       }
 
@@ -85,6 +86,7 @@ export class DeepSeekService {
         throw new DeepSeekError(
           DeepSeekErrorType.ANALYSIS_ERROR,
           parsed.error || "Falha na extração de dados do documento",
+          parsed.details,
         );
       }
 
