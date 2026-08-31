@@ -2,11 +2,59 @@ import { prisma } from "../core/database.js";
 import { logger } from "../core/logger.js";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
 import {
+  newFornecedorSchema,
   NewFornecedorInput,
   SearchFornecedorInput,
 } from "../schemas/fornecedor.js";
+import { PdfService } from "./pdf.js";
+
+export interface ProcessFornecedorFileResult {
+  file: string;
+  success: boolean;
+  error?:
+    | {
+        type: string;
+        message: string;
+        details?: Record<string, unknown>;
+      }
+    | string;
+  data?: {
+    id: string;
+    cnpj: string;
+    name: string;
+    uf: string;
+    municipio: string;
+  };
+}
 
 export class FornecedorService {
+  static async processFile(
+    file: Express.Multer.File,
+  ): Promise<ProcessFornecedorFileResult> {
+    const extracted = await PdfService.extractFornecedorData(file.buffer);
+
+    const validatedData = await newFornecedorSchema.parseAsync({
+      cnpj: extracted.cnpj,
+      name: extracted.name,
+      uf: extracted.uf,
+      municipio: extracted.municipio,
+    });
+
+    const fornecedor = await this.createFornecedor(validatedData);
+
+    return {
+      file: file.originalname,
+      success: true,
+      data: {
+        id: fornecedor.id,
+        cnpj: fornecedor.cnpj,
+        name: fornecedor.name,
+        uf: fornecedor.uf,
+        municipio: fornecedor.municipio,
+      },
+    };
+  }
+
   static async createFornecedor(data: NewFornecedorInput) {
     logger.info(
       {

@@ -1,10 +1,10 @@
 import rateLimit from "express-rate-limit";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
 
-const windowMs = Number(process.env.CND_RATE_LIMIT_WINDOW_MS || 60 * 1000);
-const limit = Number(process.env.CND_RATE_LIMIT_MAX || 20);
+const windowMs = Number(process.env.DEEPSEEK_RATE_LIMIT_WINDOW_MS || 60 * 1000);
+const limit = Number(process.env.DEEPSEEK_RATE_LIMIT_MAX || 20);
 
-export const cndRateLimit = rateLimit({
+export const deepseekRateLimit = rateLimit({
   windowMs,
   limit,
   standardHeaders: true,

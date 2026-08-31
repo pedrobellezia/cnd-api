@@ -1,4 +1,8 @@
-import { deepseekClient, promptConfig } from "../core/deepseek.js";
+import {
+  deepseekClient,
+  cndPromptConfig,
+  fornecedorPromptConfig,
+} from "../core/deepseek.js";
 import { logger } from "../core/logger.js";
 import axios from "axios";
 import {
@@ -15,15 +19,22 @@ export type CndExtractionResult = {
   status: string;
 };
 
+export type FornecedorExtractionResult = {
+  cnpj: string;
+  name: string;
+  uf: string;
+  municipio: string;
+};
+
 export class DeepSeekService {
   static async analyzeCndText(text: string): Promise<CndExtractionResult> {
     try {
       const response = await deepseekClient.post("/chat/completions", {
-        model: promptConfig.model,
-        temperature: promptConfig.temperature,
-        response_format: promptConfig.response_format,
+        model: cndPromptConfig.model,
+        temperature: cndPromptConfig.temperature,
+        response_format: cndPromptConfig.response_format,
         messages: [
-          { role: "system", content: promptConfig.system },
+          { role: "system", content: cndPromptConfig.system },
           { role: "user", content: text },
         ],
       });
@@ -45,86 +56,125 @@ export class DeepSeekService {
         tipo: data.tipo,
         status: data.status,
       };
-    } catch (err: any) {
-      if (err instanceof BaseError) {
-        throw err;
-      }
+    } catch (err: unknown) {
+      this.handleError(err, "DeepSeekService.analyzeCndText");
+    }
+  }
 
-      if (axios.isAxiosError(err)) {
-        logger.error(
-          {
-            context: "DeepSeekService.analyzeCndText",
-            status: err.response?.status,
-            deepseekError: err.response?.data,
-            error: err.message,
-          },
-          `Erro na chamada da API do DeepSeek: ${
-            err.response?.data?.error?.message || err.message
-          }`,
-        );
-      } else {
-        logger.error(
-          {
-            context: "DeepSeekService.analyzeCndText",
-            error: err.message || String(err),
-            stack: err.stack,
-          },
-          `Erro inesperado ao processar resposta do DeepSeek: ${err.message || String(err)}`,
-        );
-      }
+  static async analyzeFornecedorText(
+    text: string,
+  ): Promise<FornecedorExtractionResult> {
+    try {
+      const response = await deepseekClient.post("/chat/completions", {
+        model: fornecedorPromptConfig.model,
+        temperature: fornecedorPromptConfig.temperature,
+        response_format: fornecedorPromptConfig.response_format,
+        messages: [
+          { role: "system", content: fornecedorPromptConfig.system },
+          { role: "user", content: text },
+        ],
+      });
 
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status;
+      const parsed = JSON.parse(response.data.choices[0].message.content);
 
-        switch (status) {
-          case 400:
-          case 422:
-            throw new DeepSeekError(
-              DeepSeekErrorType.CONFIGURATION_ERROR,
-              "Erro de configuração nos parâmetros da integração com o DeepSeek.",
-            );
-          case 401:
-            throw new DeepSeekError(
-              DeepSeekErrorType.CREDENTIALS_ERROR,
-              "Chave de API do DeepSeek inválida.",
-            );
-          case 402:
-            throw new DeepSeekError(
-              DeepSeekErrorType.CREDENTIALS_ERROR,
-              "Saldo insuficiente na conta do DeepSeek associada à chave de API configurada.",
-            );
-          case 429:
-            throw new DeepSeekError(
-              DeepSeekErrorType.RATE_LIMIT_EXCEEDED,
-              "Muitas requisições enviadas ao mesmo tempo (Rate Limit).",
-            );
-          case 503:
-            throw new DeepSeekError(
-              DeepSeekErrorType.API_COMMUNICATION_ERROR,
-              "Os servidores do DeepSeek estão temporariamente sobrecarregados.",
-            );
-
-          case 500:
-          default:
-            throw new DeepSeekError(
-              DeepSeekErrorType.API_COMMUNICATION_ERROR,
-              "Erro interno nos servidores da API do DeepSeek. Tente novamente mais tarde.",
-            );
-        }
-      }
-
-      if (err instanceof SyntaxError || err instanceof TypeError) {
+      if (!parsed.success) {
         throw new DeepSeekError(
-          DeepSeekErrorType.INVALID_RESPONSE,
-          "Resposta recebida da API do DeepSeek é inválida ou malformada",
-          { originalError: err.message },
+          DeepSeekErrorType.ANALYSIS_ERROR,
+          parsed.error || "Falha na extração de dados do documento",
         );
       }
 
-      throw new DeepSeekError(
-        DeepSeekErrorType.API_COMMUNICATION_ERROR,
-        err.message || "Erro de comunicação com o serviço do DeepSeek",
+      const data = parsed.data;
+      return {
+        cnpj: data.cnpj,
+        name: data.name,
+        uf: data.uf,
+        municipio: data.municipio,
+      };
+    } catch (err: unknown) {
+      this.handleError(err, "DeepSeekService.analyzeFornecedorText");
+    }
+  }
+
+  private static handleError(err: any, context: string): never {
+    if (err instanceof BaseError) {
+      throw err;
+    }
+
+    if (axios.isAxiosError(err)) {
+      logger.error(
+        {
+          context,
+          status: err.response?.status,
+          deepseekError: err.response?.data,
+          error: err.message,
+        },
+        `Erro na chamada da API do DeepSeek: ${
+          err.response?.data?.error?.message || err.message
+        }`,
+      );
+    } else {
+      logger.error(
+        {
+          context,
+          error: err.message || String(err),
+          stack: err.stack,
+        },
+        `Erro inesperado ao processar resposta do DeepSeek: ${err.message || String(err)}`,
       );
     }
+
+    if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+
+      switch (status) {
+        case 400:
+        case 422:
+          throw new DeepSeekError(
+            DeepSeekErrorType.CONFIGURATION_ERROR,
+            "Erro de configuração nos parâmetros da integração com o DeepSeek.",
+          );
+        case 401:
+          throw new DeepSeekError(
+            DeepSeekErrorType.CREDENTIALS_ERROR,
+            "Chave de API do DeepSeek inválida.",
+          );
+        case 402:
+          throw new DeepSeekError(
+            DeepSeekErrorType.CREDENTIALS_ERROR,
+            "Saldo insuficiente na conta do DeepSeek associada à chave de API configurada.",
+          );
+        case 429:
+          throw new DeepSeekError(
+            DeepSeekErrorType.RATE_LIMIT_EXCEEDED,
+            "Muitas requisições enviadas ao mesmo tempo (Rate Limit).",
+          );
+        case 503:
+          throw new DeepSeekError(
+            DeepSeekErrorType.API_COMMUNICATION_ERROR,
+            "Os servidores do DeepSeek estão temporariamente sobrecarregados.",
+          );
+
+        case 500:
+        default:
+          throw new DeepSeekError(
+            DeepSeekErrorType.API_COMMUNICATION_ERROR,
+            "Erro interno nos servidores da API do DeepSeek. Tente novamente mais tarde.",
+          );
+      }
+    }
+
+    if (err instanceof SyntaxError || err instanceof TypeError) {
+      throw new DeepSeekError(
+        DeepSeekErrorType.INVALID_RESPONSE,
+        "Resposta recebida da API do DeepSeek é inválida ou malformada",
+        { originalError: err.message },
+      );
+    }
+
+    throw new DeepSeekError(
+      DeepSeekErrorType.API_COMMUNICATION_ERROR,
+      err.message || "Erro de comunicação com o serviço do DeepSeek",
+    );
   }
 }

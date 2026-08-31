@@ -19,8 +19,15 @@ export type CndExtracted = {
   status: string;
 };
 
+export type FornecedorExtracted = {
+  cnpj: string;
+  name: string;
+  uf: string;
+  municipio: string;
+};
+
 export class PdfService {
-  static async extractCndData(buffer: Buffer): Promise<CndExtracted> {
+  static async extractTextFromPdf(buffer: Buffer): Promise<string> {
     const parser = new PDFParse({
       data: new Uint8Array(buffer),
       standardFontDataUrl: path.join(
@@ -42,6 +49,20 @@ export class PdfService {
         "PDF vazio ou ilegível",
       );
     }
+
+    return text;
+  }
+
+  static async extractFornecedorData(
+    buffer: Buffer,
+  ): Promise<FornecedorExtracted> {
+    const text = await this.extractTextFromPdf(buffer);
+
+    return DeepSeekService.analyzeFornecedorText(text);
+  }
+
+  static async extractCndData(buffer: Buffer): Promise<CndExtracted> {
+    const text = await this.extractTextFromPdf(buffer);
 
     const extracted = await DeepSeekService.analyzeCndText(text);
 

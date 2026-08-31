@@ -6,7 +6,7 @@ import { mapError } from "../errors/mapError.js";
 import { searchCndSchema } from "../schemas/cnd.js";
 import { normalizeResponse } from "../utils/normalize.js";
 import { logger } from "../core/logger.js";
-import { cndRateLimit } from "../middlewares/rateLimit.js";
+import { deepseekRateLimit } from "../middlewares/rateLimit.js";
 
 const cndRoute = Router();
 
@@ -30,7 +30,7 @@ cndRoute.get(
 
 cndRoute.post(
   "/",
-  cndRateLimit,
+  deepseekRateLimit,
   upload.array("file"),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
