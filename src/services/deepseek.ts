@@ -26,6 +26,8 @@ export type FornecedorExtractionResult = {
   municipio: string;
 };
 
+const deepseekMaxTokens = Number(process.env.DEEPSEEK_MAX_TOKENS || 2048);
+
 export class DeepSeekService {
   static async analyzeCndText(text: string): Promise<CndExtractionResult> {
     try {
@@ -33,6 +35,7 @@ export class DeepSeekService {
         model: cndPromptConfig.model,
         temperature: cndPromptConfig.temperature,
         response_format: cndPromptConfig.response_format,
+        max_tokens: deepseekMaxTokens,
         messages: [
           { role: "system", content: cndPromptConfig.system },
           { role: "user", content: text },
@@ -69,6 +72,7 @@ export class DeepSeekService {
         model: fornecedorPromptConfig.model,
         temperature: fornecedorPromptConfig.temperature,
         response_format: fornecedorPromptConfig.response_format,
+        max_tokens: deepseekMaxTokens,
         messages: [
           { role: "system", content: fornecedorPromptConfig.system },
           { role: "user", content: text },
