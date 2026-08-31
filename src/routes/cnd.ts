@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { CndService } from "../services/cnd.js";
-import { AppError, AppErrorType } from "../errors/custom-errors.js";
+import { AppError, AppErrorType, BaseError } from "../errors/custom-errors.js";
 import { mapError } from "../errors/mapError.js";
 import { searchCndSchema } from "../schemas/cnd.js";
 import { normalizeResponse } from "../utils/normalize.js";
@@ -52,7 +52,22 @@ cndRoute.post(
           results.push(rs);
         } catch (err: unknown) {
           logger.warn(
-            { context: "cndRoute.post", file: file.originalname, error: err },
+            {
+              context: "cndRoute.post",
+              file: file.originalname,
+              error:
+                err instanceof BaseError
+                  ? {
+                      name: err.name,
+                      type: err.type,
+                      statusCode: err.statusCode,
+                      message: err.message,
+                      details: err.details,
+                    }
+                  : err instanceof Error
+                    ? { name: err.name, message: err.message, stack: err.stack }
+                    : err,
+            },
             "Falha no processamento de arquivo de CND",
           );
 
