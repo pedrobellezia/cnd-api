@@ -31,8 +31,8 @@ cp .env.example .env
 | `LOG_LEVEL`                | Nível mínimo de logging.                                                              | `debug`                                                        |
 | `DEEPSEEK_API_KEY`         | Chave de API do DeepSeek.                                                             | `sk-cnd...`                                                    |
 | `API_KEY`                  | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
-| `CND_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd`, em ms. Opcional (padrão `60000`).     | `60000`                                                        |
-| `CND_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd`. Opcional (padrão `20`). | `20`                                                           |
+| `DEEPSEEK_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd` e `POST /fornecedor/pdf`, em ms. Opcional (padrão `60000`). | `60000`                                          |
+| `DEEPSEEK_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `20`). | `20`                                     |
 | `DATABASE_URL`             | URL para conexão com o banco de dados PostgreSQL.                                     | `postgresql://user:password@localhost:5432/mydb?schema=public` |
 | `POSTGRES_USER`            | Usuário do PostgreSQL (para Docker Compose).                                          | `user`                                                         |
 | `POSTGRES_PASSWORD`        | Senha do PostgreSQL (para Docker Compose).                                            | `password`                                                     |
@@ -104,6 +104,31 @@ cp .env.example .env
     "uf": "SC",
     "municipio": "BLUMENAU"
   }
+  ```
+
+---
+
+#### Cadastrar Fornecedor via PDF
+
+- **Rota:** `/fornecedor/pdf`
+- **Método:** `POST`
+- **Headers:** `Content-Type: multipart/form-data`
+- **Body:** Enviar um ou mais arquivos no campo `file`. Cada PDF deve ser um Comprovante de Inscrição e de Situação Cadastral do CNPJ (Receita Federal).
+- **Retorno (201 Created):**
+  ```json
+  [
+    {
+      "file": "cartao_cnpj.pdf",
+      "success": true,
+      "data": {
+        "id": "b1e2c3d4-...",
+        "cnpj": "12345678000190",
+        "name": "Empresa Exemplo LTDA",
+        "uf": "SC",
+        "municipio": "BLUMENAU"
+      }
+    }
+  ]
   ```
 
 ---
@@ -274,7 +299,7 @@ Em caso de falhas, a API retorna respostas em formato padronizado contendo o tip
 | `UNAUTHORIZED`            |     401     | Header `x-api-key` ausente ou inválido.                                                            |
 | `NOT_FOUND`               |     404     | O fornecedor ou o tipo de CND informado não existe no sistema.                                     |
 | `CONFLICT`                |     409     | Tentativa de cadastrar um CNPJ que já está cadastrado no sistema.                                  |
-| `RATE_LIMIT_EXCEEDED`     |     429     | Excedido o limite de requisições em `POST /cnd` (`CND_RATE_LIMIT_WINDOW_MS`/`CND_RATE_LIMIT_MAX`). |
+| `RATE_LIMIT_EXCEEDED`     |     429     | Excedido o limite de requisições em `POST /cnd` ou `POST /fornecedor/pdf` (`DEEPSEEK_RATE_LIMIT_WINDOW_MS`/`DEEPSEEK_RATE_LIMIT_MAX`). |
 | `EXPIRED_CND`             |     400     | A CND enviada já está expirada, sendo rejeitada pelo sistema.                                      |
 | `EMPTY_OR_UNREADABLE`     |     400     | O arquivo PDF enviado está vazio ou não possui texto legível por OCR/Parser.                       |
 | `ANALYSIS_ERROR`          |     400     | A IA não conseguiu identificar ou validar a situação fiscal do contribuinte principal no PDF.      |

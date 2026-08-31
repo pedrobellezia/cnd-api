@@ -4,7 +4,7 @@
 
 Todas as rotas exigem o header `x-api-key` (variável `API_KEY`), exceto `/public` (arquivos estáticos, servidos sem auth de propósito).
 
-`POST /cnd` tem rate limit configurável via `CND_RATE_LIMIT_WINDOW_MS`/`CND_RATE_LIMIT_MAX` (padrão: 20 requisições/minuto por IP), já que cada arquivo processado gera uma chamada paga à API do DeepSeek.
+`POST /cnd` e `POST /fornecedor/pdf` compartilham o mesmo rate limit, configurável via `DEEPSEEK_RATE_LIMIT_WINDOW_MS`/`DEEPSEEK_RATE_LIMIT_MAX` (padrão: 20 requisições/minuto por IP), já que cada arquivo processado em qualquer uma das duas rotas gera uma chamada paga à API do DeepSeek.
 
 Detalhes de cada endpoint (query params, formato de resposta) estão no `README.md`.
 
@@ -51,6 +51,42 @@ sequenceDiagram
     
     Service-->>Router: Retorna resultado (sucesso/dados)
     Router-->>Cliente: Resposta HTTP 201 com array de CNDs processadas
+```
+
+### Fluxo de Cadastro de Fornecedor via PDF (Upload)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente
+    participant Router as fornecedorRoute (Express)
+    participant Service as FornecedorService
+    participant PDF as PdfService
+    participant DeepSeek as DeepSeekService
+    participant DB as Banco de Dados (Prisma)
+
+    Cliente->>Router: POST /fornecedor/pdf (form-data: file)
+    Note over Router: Validação de arquivo e assinatura (%PDF-)
+
+    Router->>Service: FornecedorService.processFile(file)
+
+    Service->>PDF: PdfService.extractFornecedorData(buffer)
+    Note over PDF: Extração de texto usando pdf-parse
+
+    PDF->>DeepSeek: DeepSeekService.analyzeFornecedorText(text)
+    Note over DeepSeek: Valida se é um Comprovante de CNPJ e extrai cnpj/name/uf/municipio
+    DeepSeek-->>PDF: Retorna JSON (cnpj, name, uf, municipio)
+    PDF-->>Service: Retorna dados estruturados
+
+    Service->>DB: Verifica se o CNPJ já está cadastrado
+    DB-->>Service: Fornecedor existente ou não
+
+    Note over Service: Se já existir, lança CONFLICT (409)
+    Service->>DB: Cria registro do Fornecedor (prisma.fornecedor.create)
+    DB-->>Service: Fornecedor criado
+
+    Service-->>Router: Retorna resultado (sucesso/dados)
+    Router-->>Cliente: Resposta HTTP 201 com array de fornecedores processados
 ```
 
 ### Modelagem do Banco de Dados
@@ -134,7 +170,8 @@ A estrutura interna do projeto segue uma divisão modular para separar responsab
 src/
 ├── core/                     # Configurações globais e clientes compartilhados 
 │   ├── database.ts
-│   ├── deepseek-prompt.json
+│   ├── cnd-prompt.json
+│   ├── fornecedor-prompt.json
 │   ├── deepseek.ts
 │   └── logger.ts
 ├── errors/                   # Erros customizados e tratamento global de exceções
@@ -145,7 +182,7 @@ src/
 │   └── prisma/
 ├── middlewares/               # Middlewares de auth e rate limit
 │   ├── apiKey.ts              # Exige header x-api-key (API_KEY) em todas as rotas, exceto /public
-│   └── rateLimit.ts           # Rate limit configurável (CND_RATE_LIMIT_*) em POST /cnd
+│   └── rateLimit.ts           # Rate limit configurável (DEEPSEEK_RATE_LIMIT_*) em POST /cnd e POST /fornecedor/pdf
 ├── routes/                   # Definição dos endpoints HTTP
 │   ├── cnd.ts
 │   └── fornecedor.ts
