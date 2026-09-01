@@ -30,7 +30,7 @@ cp .env.example .env
 | `HOST`                     | Interface de rede na qual o Express iniciará.                                         | `0.0.0.0`                                                      |
 | `LOG_LEVEL`                | Nível mínimo de logging.                                                              | `debug`                                                        |
 | `DEEPSEEK_API_KEY`         | Chave de API do DeepSeek.                                                             | `sk-cnd...`                                                    |
-| `API_KEY`                  | Chave exigida no header `x-api-key` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
+| `API_KEY`                  | Chave exigida no header `Authorization: Bearer <API_KEY>` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
 | `DEEPSEEK_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd` e `POST /fornecedor/pdf`, em ms. Opcional (padrão `60000`). | `60000`                                          |
 | `DEEPSEEK_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `20`). | `20`                                     |
 | `PDF_MAX_FILE_SIZE_MB`     | Tamanho máximo (em MB) de cada PDF enviado em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `10`). | `10`                                                           |
@@ -297,7 +297,7 @@ Em caso de falhas, a API retorna respostas em formato padronizado contendo o tip
 | Tipo de Erro (`type`)     | Status HTTP | Descrição                                                                                          |
 | :------------------------ | :---------: | :------------------------------------------------------------------------------------------------- |
 | `VALIDATION_ERROR`        |     400     | Os parâmetros ou dados de entrada não correspondem ao esquema validado via Zod.                    |
-| `UNAUTHORIZED`            |     401     | Header `x-api-key` ausente ou inválido.                                                            |
+| `UNAUTHORIZED`            |     401     | Header `Authorization: Bearer <API_KEY>` ausente ou inválido.                                                            |
 | `NOT_FOUND`               |     404     | O fornecedor ou o tipo de CND informado não existe no sistema.                                     |
 | `CONFLICT`                |     409     | Tentativa de cadastrar um CNPJ que já está cadastrado no sistema.                                  |
 | `RATE_LIMIT_EXCEEDED`     |     429     | Excedido o limite de requisições em `POST /cnd` ou `POST /fornecedor/pdf` (`DEEPSEEK_RATE_LIMIT_WINDOW_MS`/`DEEPSEEK_RATE_LIMIT_MAX`). |

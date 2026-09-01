@@ -128,8 +128,8 @@
         "headerParameters": {
           "parameters": [
             {
-              "name": "x-api-key",
-              "value": "={{ CND_API_KEY }}"
+              "name": "Authorization",
+              "value": "=Bearer {{ CND_API_KEY }}"
             }
           ]
         }

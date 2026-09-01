@@ -6,7 +6,10 @@ export function apiKeyAuth(
   res: Response,
   next: NextFunction,
 ): void {
-  const apiKey = req.header("x-api-key");
+  const authHeader = req.header("authorization");
+  const apiKey = authHeader?.startsWith("Bearer ")
+    ? authHeader.slice("Bearer ".length)
+    : undefined;
 
   if (!apiKey || apiKey !== process.env.API_KEY) {
     next(

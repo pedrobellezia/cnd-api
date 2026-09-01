@@ -122,7 +122,7 @@ Esse node processa os itens em lote com um intervalo de 2 minutos entre lotes (`
 O nó **"Verificar Erro"** (nó do tipo Switch no n8n) avalia o resultado retornado pelo `cnd-scraper` para determinar a próxima ação no fluxo:
 
 ##### 1. Caso de Sucesso (`success === true`)
-O scraper emite a certidão com sucesso e devolve o binário (PDF). O n8n envia os dados via multipart form-data para a CND API no endpoint `POST /cnd` (`http://${CND_HOST}:3030/cnd`), incluindo o header `x-api-key` (`API_KEY`, exigido desde que a `cnd-api` passou a autenticar todas as rotas exceto `/public`), para salvar o registro regular no banco.
+O scraper emite a certidão com sucesso e devolve o binário (PDF). O n8n envia os dados via multipart form-data para a CND API no endpoint `POST /cnd` (`http://${CND_HOST}:3030/cnd`), incluindo o header `Authorization: Bearer <API_KEY>` (`API_KEY`, exigido desde que a `cnd-api` passou a autenticar todas as rotas exceto `/public`), para salvar o registro regular no banco.
 
 ##### 2. Erros Conhecidos (Fila de Cooldown)
 Se a requisição retornar falha e o erro estiver incluso na seguinte lista:
