@@ -1,4 +1,5 @@
 import { prisma } from "../core/database.js";
+import { Prisma } from "../generated/prisma/client.js";
 import { logger } from "../core/logger.js";
 import { DateTime } from "luxon";
 import { AppError, AppErrorType } from "../errors/custom-errors.js";
@@ -145,19 +146,32 @@ export class CndService {
       }),
     };
 
-    const [data, total] = await Promise.all([
-      prisma.cnd.findMany({
-        where,
-        skip: (filters.page - 1) * filters.limit,
-        take: filters.limit,
-        orderBy: { createdAt: "desc" },
-        include: {
-          fornecedor: { select: { name: true, cnpj: true } },
-          cndtype: { select: { name: true } },
-        },
-      }),
-      prisma.cnd.count({ where }),
-    ]);
+    let data, total;
+    try {
+      [data, total] = await Promise.all([
+        prisma.cnd.findMany({
+          where,
+          skip: (filters.page - 1) * filters.limit,
+          take: filters.limit,
+          orderBy: filters.sort?.length
+            ? filters.sort.map(({ key, order }) => ({ [key]: order }))
+            : [{ createdAt: "desc" }],
+          include: {
+            fornecedor: { select: { name: true, cnpj: true } },
+            cndtype: { select: { name: true } },
+          },
+        }),
+        prisma.cnd.count({ where }),
+      ]);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientValidationError) {
+        throw new AppError(
+          AppErrorType.VALIDATION_ERROR,
+          "Parâmetros de busca inválidos",
+        );
+      }
+      throw error;
+    }
 
     return {
       data,

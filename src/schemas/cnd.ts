@@ -25,12 +25,27 @@ function toArray(val: unknown): string[] | undefined {
   return flat.length > 0 ? flat : undefined;
 }
 
+function sortarray(input: unknown) {
+  if (typeof input !== "string" || input.trim() === "") return undefined;
+
+  return input.split(",").map((part) => {
+    const [key, order] = part.split(":");
+    return { key, order };
+  });
+}
+
+const SortPar = z.object({
+    key: z.enum(["createdAt", "validade", "emissao", "status"]),
+    order: z.enum(["asc", "desc"]),
+});
+
 export const searchCndSchema = z
   .object({
     name: z
       .string()
       .optional()
       .transform((val) => (val ? val.trim() : undefined)),
+    sort: z.preprocess(sortarray, z.array(SortPar).optional()),
     cnpj: z.preprocess(
       toArray,
       z.array(z.string().transform(normalizeCnpj)).optional(),
