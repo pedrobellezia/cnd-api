@@ -124,7 +124,7 @@ export class CndService {
       ...(Object.keys(fornecedorFilter).length > 0 && {
         fornecedor: fornecedorFilter,
       }),
-      ...(filters.status && { status: { in: filters.status } }),
+      status: { in: filters.status ?? ["regular", "irregular"] },
       ...(filters.tipo && {
         OR: filters.tipo.map((tipo) => ({
           cndtype: { name: { equals: tipo, mode: "insensitive" as const } },
