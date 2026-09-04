@@ -99,10 +99,10 @@ A query SQL avalia dois cenários principais (utilizando uma cláusula `OR` na c
 
 | Tipo de CND | Parâmetro `$2` (Validade Mínima) | Parâmetro `$3` (Intervalo de Cooldown) | Filtros de Suporte |
 | :--- | :--- | :--- | :--- |
-| **FGTS** | `1 day` (1 dia) | `1 day` (1 dia) | Nenhum. |
+| **FGTS** | `0 day` (0 dias) | `1 day` (1 dia) | Nenhum. |
 | **Trabalhista** | `3 day` (3 dias) | `1 day` (1 dia) | Nenhum. |
 | **Estadual** | `3 day` (3 dias) | `2 day` (2 dias) | Apenas UFs com scripts disponíveis cadastrados na tabela `estadual`. |
-| **Municipal** | `3 day` (3 dias) | `2 day` (2 dias) | Apenas Municípios/UFs cadastrados na tabela `municipal`. |
+| **Municipal** | `3 day` (3 dias) | `12 hours` (12 horas) | Apenas Municípios/UFs cadastrados na tabela `municipal`. |
 
 ---
 
@@ -113,7 +113,7 @@ Diferente da versão anterior (um node HTTP por tipo de CND), agora um único no
 { "cnpj": "...", "uf": "...", "municipio": "..." }
 ```
 
-Esse node processa os itens em lote com um intervalo de 2 minutos entre lotes (`batching.batchInterval: 120000`), evitando disparar todas as emissões pendentes de uma vez.
+Esse node processa os itens em lotes de 1 (`batching.batch.batchSize: 1`) com um intervalo de 15 segundos entre lotes (`batching.batchInterval: 15000`), evitando disparar todas as emissões pendentes de uma vez. Cada chamada tem um timeout de 1 hora (`options.timeout: 3600000`), já que o scraping de uma certidão pode demorar bastante.
 
 ---
 

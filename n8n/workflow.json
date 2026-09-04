@@ -6,7 +6,7 @@
         "operation": "executeQuery",
         "query": "SELECT\n    f.*,\n    'fgts' AS \"cndtype\"\nFROM \"fornecedor\" f\nWHERE \n  (\n    $1 IS NOT NULL \n    AND f.cnpj = $1\n  )\n  OR (\n    $1 IS NULL\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status = 'regular'\n        AND c.\"validade\" >= NOW() + INTERVAL $2\n    )\n    AND NOT EXISTS (\n      SELECT 1\n      FROM \"cnd\" c\n      JOIN \"cndtype\" ct ON c.\"cndtypeid\" = ct.id\n      WHERE c.\"fornecedorid\" = f.id\n        AND ct.name = 'fgts'\n        AND c.status IN ('error', 'irregular')\n        AND c.\"createdAt\" >= NOW() - INTERVAL $3\n    )\n  );",
         "options": {
-          "queryReplacement": "={{ [$json.cnpj || null, '1 day', '1 day'] }}"
+          "queryReplacement": "={{ [$json.cnpj || null, '0 day', '1 day'] }}"
         }
       },
       "type": "n8n-nodes-base.postgres",
@@ -346,14 +346,16 @@
         "options": {
           "batching": {
             "batch": {
-              "batchInterval": 120000
+              "batchSize": 1,
+              "batchInterval": 15000
             }
           },
           "response": {
             "response": {
               "neverError": true
             }
-          }
+          },
+          "timeout": 3600000
         }
       },
       "type": "n8n-nodes-base.httpRequest",
