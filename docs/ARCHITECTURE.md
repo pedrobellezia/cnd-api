@@ -149,7 +149,7 @@ erDiagram
 > 
 > Se você quiser utilizar este projeto de forma independente (sem a integração), basta definir a variável de ambiente `CHECK_INTEGRATION=false` no seu arquivo `.env`.
 > 
-> Para mais detalhes sobre o funcionamento da integração, consulte o arquivo `INTEGRATION.md` (WIP).
+> Para mais detalhes sobre o funcionamento da integração, consulte o arquivo `INTEGRATION.md`.
 
 ---
 

@@ -30,6 +30,7 @@ cp .env.example .env
 | `HOST`                     | Interface de rede na qual o Express iniciará.                                         | `0.0.0.0`                                                      |
 | `LOG_LEVEL`                | Nível mínimo de logging.                                                              | `debug`                                                        |
 | `DEEPSEEK_API_KEY`         | Chave de API do DeepSeek.                                                             | `sk-cnd...`                                                    |
+| `DEEPSEEK_MAX_TOKENS`      | Limite de tokens de saída nas chamadas ao DeepSeek. Opcional (padrão `2048`).         | `2048`                                                          |
 | `API_KEY`                  | Chave exigida no header `Authorization: Bearer <API_KEY>` para acessar a API (exceto `/public`).            | `um-segredo-qualquer`                                          |
 | `DEEPSEEK_RATE_LIMIT_WINDOW_MS` | Duração da janela de rate limit em `POST /cnd` e `POST /fornecedor/pdf`, em ms. Opcional (padrão `60000`). | `60000`                                          |
 | `DEEPSEEK_RATE_LIMIT_MAX`       | Máximo de requisições por IP dentro da janela em `POST /cnd` e `POST /fornecedor/pdf`. Opcional (padrão `20`). | `20`                                     |
