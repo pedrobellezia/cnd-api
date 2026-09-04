@@ -216,10 +216,11 @@ cp .env.example .env
 - **Query Params (Filtros Opcionais):**
   - `name` — busca parcial e case-insensitive pelo nome do fornecedor (ex: `name=exemp`).
   - `cnpj` — um ou mais CNPJs. Repita o parâmetro (`cnpj=A&cnpj=B`) ou separe por vírgula (`cnpj=A,B`).
-  - `status` — um ou mais status (mesmo formato de `cnpj`, ex: `status=regular,irregular`).
+  - `status` — um ou mais status (mesmo formato de `cnpj`, ex: `status=regular,irregular`). Se omitido, o padrão é `regular,irregular`.
   - `tipo` — um ou mais tipos de CND (mesmo formato, ex: `tipo=fgts,municipal`), comparação case-insensitive.
   - `emissaoDe` / `emissaoAte` — filtra pela data de emissão. Use só `emissaoDe` (a partir de), só `emissaoAte` (até), ou os dois juntos (intervalo). Formato `YYYY-MM-DD`.
   - `validadeDe` / `validadeAte` — mesma lógica, para a data de validade.
+  - `sort` — ordenação por um ou mais campos, no formato `campo:direção` separados por vírgula (ex: `sort=validade:asc,status:desc`). Campos aceitos: `createdAt`, `validade`, `emissao`, `status`. Direções: `asc`, `desc`. Se omitido, ordena por `createdAt:desc`.
   - `page` — página atual (padrão `1`).
   - `limit` — itens por página (padrão `20`, máximo `100`).
 - **Retorno (200 OK):**
